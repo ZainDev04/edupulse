@@ -1,0 +1,130 @@
+{
+  "n_rows": 1000,
+  "n_columns": 22,
+  "missing_values": 0,
+  "duplicates": 0,
+  "scores": {
+    "math_score": {
+      "count": 1000.0,
+      "mean": 66.09,
+      "std": 15.16,
+      "min": 0.0,
+      "25%": 57.0,
+      "50%": 66.0,
+      "75%": 77.0,
+      "max": 100.0
+    },
+    "reading_score": {
+      "count": 1000.0,
+      "mean": 69.17,
+      "std": 14.6,
+      "min": 17.0,
+      "25%": 59.0,
+      "50%": 70.0,
+      "75%": 79.0,
+      "max": 100.0
+    },
+    "writing_score": {
+      "count": 1000.0,
+      "mean": 68.05,
+      "std": 15.2,
+      "min": 10.0,
+      "25%": 57.75,
+      "50%": 69.0,
+      "75%": 79.0,
+      "max": 100.0
+    }
+  },
+  "score_correlation": {
+    "math_score": {
+      "math_score": 1.0,
+      "reading_score": 0.818,
+      "writing_score": 0.803
+    },
+    "reading_score": {
+      "math_score": 0.818,
+      "reading_score": 1.0,
+      "writing_score": 0.955
+    },
+    "writing_score": {
+      "math_score": 0.803,
+      "reading_score": 0.955,
+      "writing_score": 1.0
+    }
+  },
+  "categorical": {
+    "gender": {
+      "female": 518,
+      "male": 482
+    },
+    "race_ethnicity": {
+      "group C": 319,
+      "group D": 262,
+      "group B": 190,
+      "group E": 140,
+      "group A": 89
+    },
+    "parental_level_of_education": {
+      "some college": 226,
+      "associate's degree": 222,
+      "high school": 196,
+      "some high school": 179,
+      "bachelor's degree": 118,
+      "master's degree": 59
+    },
+    "lunch": {
+      "standard": 645,
+      "free/reduced": 355
+    },
+    "test_preparation_course": {
+      "none": 642,
+      "completed": 358
+    }
+  },
+  "at_risk_rate": 0.285,
+  "performance_level_share": {
+    "medium": 0.517,
+    "low": 0.285,
+    "high": 0.198
+  },
+  "tests": {
+    "gender": {
+      "test": "welch_t",
+      "statistic": 4.179092751235273,
+      "p_value": 3.1833525566157575e-05,
+      "eta_squared": 0.017126348109360142
+    },
+    "race_ethnicity": {
+      "test": "anova_f",
+      "statistic": 9.095660951548705,
+      "p_value": 3.2281793528162326e-07,
+      "eta_squared": 0.03527560214890661
+    },
+    "parental_level_of_education": {
+      "test": "anova_f",
+      "statistic": 10.752937992901668,
+      "p_value": 4.383101772122132e-10,
+      "eta_squared": 0.05131370667428163
+    },
+    "lunch": {
+      "test": "welch_t",
+      "statistic": -9.323204405666306,
+      "p_value": 1.5829991023249112e-19,
+      "eta_squared": 0.0841369671375779
+    },
+    "test_preparation_course": {
+      "test": "welch_t",
+      "statistic": 8.594673173377213,
+      "p_value": 4.422101350315798e-17,
+      "eta_squared": 0.06590259608771631
+    }
+  },
+  "figures": {
+    "score_distributions": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_distributions.png",
+    "correlation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_correlation.png",
+    "scores_by_background": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\scores_by_background.png",
+    "at_risk_by_background": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\at_risk_by_background.png",
+    "pairplot": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_pairplot.png",
+    "performance_levels": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\performance_levels.png"
+  }
+}

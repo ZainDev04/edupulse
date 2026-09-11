@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+
+# Data & artefacts - figures, model cards and metadata are committed so the README renders;
+# only the binary pipelines and the processed snapshot are regenerated via `edupulse train --all`
+data/processed/
+models/**/*.joblib
+mlruns/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.coverage

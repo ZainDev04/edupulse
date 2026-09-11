@@ -1,0 +1,362 @@
+{
+  "task": "at_risk",
+  "version": "20260911-223257",
+  "created_at": "2026-09-11T22:32:57+00:00",
+  "model_name": "logistic_regression",
+  "model_class": "LogisticRegression",
+  "best_params": {
+    "C": 0.13368862317656174
+  },
+  "cv_metric": "roc_auc",
+  "cv_score": 0.7428768115942029,
+  "test_metrics": {
+    "n_test": 200,
+    "threshold": 0.4163,
+    "roc_auc": 0.6990553306342779,
+    "average_precision": 0.5194420905849455,
+    "brier": 0.22191309719039332,
+    "log_loss": 0.6300071369557216,
+    "accuracy": 0.53,
+    "balanced_accuracy": 0.5921972764078027,
+    "precision": 0.34710743801652894,
+    "recall": 0.7368421052631579,
+    "f1": 0.47191011235955055,
+    "f2": 0.6017191977077364,
+    "positive_rate": 0.285,
+    "flagged_rate": 0.605,
+    "confusion_matrix": [
+      [
+        64,
+        79
+      ],
+      [
+        15,
+        42
+      ]
+    ],
+    "classification_report": {
+      "0": {
+        "precision": 0.810126582278481,
+        "recall": 0.44755244755244755,
+        "f1-score": 0.5765765765765766,
+        "support": 143.0
+      },
+      "1": {
+        "precision": 0.34710743801652894,
+        "recall": 0.7368421052631579,
+        "f1-score": 0.47191011235955055,
+        "support": 57.0
+      },
+      "accuracy": 0.53,
+      "macro avg": {
+        "precision": 0.578617010147505,
+        "recall": 0.5921972764078027,
+        "f1-score": 0.5242433444680635,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.6781661261638245,
+        "recall": 0.53,
+        "f1-score": 0.5467466342747241,
+        "support": 200.0
+      }
+    }
+  },
+  "threshold": 0.4163,
+  "features": [
+    "gender",
+    "race_ethnicity",
+    "parental_level_of_education",
+    "lunch",
+    "test_preparation_course"
+  ],
+  "encoded_features": [
+    "gender_female",
+    "gender_male",
+    "race_ethnicity_group A",
+    "race_ethnicity_group B",
+    "race_ethnicity_group C",
+    "race_ethnicity_group D",
+    "race_ethnicity_group E",
+    "lunch_free/reduced",
+    "lunch_standard",
+    "test_preparation_course_completed",
+    "test_preparation_course_none",
+    "parental_level_of_education"
+  ],
+  "n_train": 800,
+  "n_test": 200,
+  "data_sha256": "1d32fe149100deae",
+  "train_seconds": 32.018267899999046,
+  "explainability": {
+    "permutation_importance": [
+      {
+        "feature": "test_preparation_course",
+        "importance_mean": 0.07899030793767632,
+        "importance_std": 0.02479055534123573
+      },
+      {
+        "feature": "lunch",
+        "importance_mean": 0.04262667157403993,
+        "importance_std": 0.023299761573904308
+      },
+      {
+        "feature": "parental_level_of_education",
+        "importance_mean": 0.026892405839774237,
+        "importance_std": 0.018523042982246028
+      },
+      {
+        "feature": "gender",
+        "importance_mean": 0.014225248435774718,
+        "importance_std": 0.01411558962880602
+      },
+      {
+        "feature": "race_ethnicity",
+        "importance_mean": 0.008397742608268843,
+        "importance_std": 0.008507097005748266
+      }
+    ],
+    "shap_importance": [
+      {
+        "feature": "lunch",
+        "mean_abs_shap": 0.6277101627043364
+      },
+      {
+        "feature": "test_preparation_course",
+        "mean_abs_shap": 0.4373894740572011
+      },
+      {
+        "feature": "race_ethnicity",
+        "mean_abs_shap": 0.2988055266541007
+      },
+      {
+        "feature": "parental_level_of_education",
+        "mean_abs_shap": 0.28305117398214913
+      },
+      {
+        "feature": "gender",
+        "mean_abs_shap": 0.2716560261584932
+      }
+    ],
+    "shap_kind": "linear"
+  },
+  "fairness": {
+    "groups": [
+      {
+        "attribute": "gender",
+        "group": "female",
+        "n": 96,
+        "prevalence": 0.23958333333333334,
+        "selection_rate": 0.46875,
+        "tpr": 0.6086956521739131,
+        "fpr": 0.4246575342465753,
+        "precision": 0.3111111111111111,
+        "roc_auc": 0.7132221560452651
+      },
+      {
+        "attribute": "gender",
+        "group": "male",
+        "n": 104,
+        "prevalence": 0.3269230769230769,
+        "selection_rate": 0.7307692307692307,
+        "tpr": 0.8235294117647058,
+        "fpr": 0.6857142857142857,
+        "precision": 0.3684210526315789,
+        "roc_auc": 0.6724789915966386
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group A",
+        "n": 16,
+        "prevalence": 0.4375,
+        "selection_rate": 0.875,
+        "tpr": 1.0,
+        "fpr": 0.7777777777777778,
+        "precision": 0.5,
+        "roc_auc": 0.7857142857142857
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group B",
+        "n": 40,
+        "prevalence": 0.35,
+        "selection_rate": 0.625,
+        "tpr": 0.6428571428571429,
+        "fpr": 0.6153846153846154,
+        "precision": 0.36,
+        "roc_auc": 0.5068681318681318
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group C",
+        "n": 57,
+        "prevalence": 0.2982456140350877,
+        "selection_rate": 0.6842105263157895,
+        "tpr": 0.7058823529411765,
+        "fpr": 0.675,
+        "precision": 0.3076923076923077,
+        "roc_auc": 0.6551470588235294
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group D",
+        "n": 58,
+        "prevalence": 0.2413793103448276,
+        "selection_rate": 0.5862068965517241,
+        "tpr": 0.8571428571428571,
+        "fpr": 0.5,
+        "precision": 0.35294117647058826,
+        "roc_auc": 0.7719155844155845
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group E",
+        "n": 29,
+        "prevalence": 0.1724137931034483,
+        "selection_rate": 0.3103448275862069,
+        "tpr": 0.4,
+        "fpr": 0.2916666666666667,
+        "precision": 0.2222222222222222,
+        "roc_auc": 0.7666666666666667
+      },
+      {
+        "attribute": "lunch",
+        "group": "free/reduced",
+        "n": 79,
+        "prevalence": 0.35443037974683544,
+        "selection_rate": 0.9493670886075949,
+        "tpr": 0.9642857142857143,
+        "fpr": 0.9411764705882353,
+        "precision": 0.36,
+        "roc_auc": 0.7822128851540617
+      },
+      {
+        "attribute": "lunch",
+        "group": "standard",
+        "n": 121,
+        "prevalence": 0.2396694214876033,
+        "selection_rate": 0.38016528925619836,
+        "tpr": 0.5172413793103449,
+        "fpr": 0.33695652173913043,
+        "precision": 0.32608695652173914,
+        "roc_auc": 0.6874062968515742
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "associate's degree",
+        "n": 43,
+        "prevalence": 0.2558139534883721,
+        "selection_rate": 0.4418604651162791,
+        "tpr": 0.5454545454545454,
+        "fpr": 0.40625,
+        "precision": 0.3157894736842105,
+        "roc_auc": 0.6889204545454546
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "bachelor's degree",
+        "n": 24,
+        "prevalence": 0.16666666666666666,
+        "selection_rate": 0.4583333333333333,
+        "tpr": 0.75,
+        "fpr": 0.4,
+        "precision": 0.2727272727272727,
+        "roc_auc": 0.75625
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "high school",
+        "n": 38,
+        "prevalence": 0.5,
+        "selection_rate": 0.8421052631578947,
+        "tpr": 0.8947368421052632,
+        "fpr": 0.7894736842105263,
+        "precision": 0.53125,
+        "roc_auc": 0.6565096952908588
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "master's degree",
+        "n": 14,
+        "prevalence": 0.07142857142857142,
+        "selection_rate": 0.2857142857142857,
+        "tpr": 1.0,
+        "fpr": 0.23076923076923078,
+        "precision": 0.25,
+        "roc_auc": 0.8461538461538461
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "some college",
+        "n": 47,
+        "prevalence": 0.2553191489361702,
+        "selection_rate": 0.5957446808510638,
+        "tpr": 0.6666666666666666,
+        "fpr": 0.5714285714285714,
+        "precision": 0.2857142857142857,
+        "roc_auc": 0.6166666666666667
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "some high school",
+        "n": 34,
+        "prevalence": 0.29411764705882354,
+        "selection_rate": 0.7941176470588235,
+        "tpr": 0.7,
+        "fpr": 0.8333333333333334,
+        "precision": 0.25925925925925924,
+        "roc_auc": 0.6541666666666667
+      }
+    ],
+    "summary": {
+      "gender": {
+        "selection_rate_gap": 0.2620192307692307,
+        "tpr_gap": 0.21483375959079276,
+        "fpr_gap": 0.2610567514677104,
+        "precision_gap": 0.05730994152046781,
+        "disparate_impact_ratio": 0.6414473684210527
+      },
+      "lunch": {
+        "selection_rate_gap": 0.5692017993513965,
+        "tpr_gap": 0.44704433497536944,
+        "fpr_gap": 0.6042199488491049,
+        "precision_gap": 0.03391304347826085,
+        "disparate_impact_ratio": 0.4004407713498623
+      },
+      "parental_level_of_education": {
+        "selection_rate_gap": 0.556390977443609,
+        "tpr_gap": 0.4545454545454546,
+        "fpr_gap": 0.6025641025641026,
+        "precision_gap": 0.28125,
+        "disparate_impact_ratio": 0.3392857142857143
+      },
+      "race_ethnicity": {
+        "selection_rate_gap": 0.5646551724137931,
+        "tpr_gap": 0.6,
+        "fpr_gap": 0.4861111111111111,
+        "precision_gap": 0.2777777777777778,
+        "disparate_impact_ratio": 0.35467980295566504
+      }
+    },
+    "figure": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_subgroups.png"
+  },
+  "figures": {
+    "leaderboard": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\leaderboard.png",
+    "tuning": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\tuning_history.png",
+    "roc_pr": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\roc_pr.png",
+    "calibration": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\calibration.png",
+    "threshold": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\threshold_sweep.png",
+    "confusion": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\confusion_matrix.png",
+    "permutation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\permutation_importance.png",
+    "shap_bar": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\shap_importance.png",
+    "shap_beeswarm": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\shap_beeswarm.png",
+    "fairness": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_subgroups.png"
+  },
+  "environment": {
+    "python": "3.14.6",
+    "sklearn": "1.9.1",
+    "pandas": "3.0.5",
+    "edupulse": "1.0.0",
+    "platform": "Windows-10-10.0.19045-SP0"
+  }
+}

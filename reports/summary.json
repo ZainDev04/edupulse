@@ -1,0 +1,56 @@
+{
+  "at_risk": {
+    "model": "logistic_regression",
+    "version": "20260911-223257",
+    "cv_metric": "roc_auc",
+    "cv_score": 0.7428768115942029,
+    "headline": "ROC-AUC 0.699 \u00b7 PR-AUC 0.519 \u00b7 recall 0.737 @ thr 0.42",
+    "test_metrics": {
+      "n_test": 200,
+      "threshold": 0.4163,
+      "roc_auc": 0.6990553306342779,
+      "average_precision": 0.5194420905849455,
+      "brier": 0.22191309719039332,
+      "log_loss": 0.6300071369557216,
+      "accuracy": 0.53,
+      "balanced_accuracy": 0.5921972764078027,
+      "precision": 0.34710743801652894,
+      "recall": 0.7368421052631579,
+      "f1": 0.47191011235955055,
+      "f2": 0.6017191977077364,
+      "positive_rate": 0.285,
+      "flagged_rate": 0.605
+    }
+  },
+  "math_score": {
+    "model": "ridge",
+    "version": "20260911-223322",
+    "cv_metric": "r2",
+    "cv_score": 0.8675535060703712,
+    "headline": "R\u00b2 0.882 \u00b7 RMSE 5.36 \u00b7 MAE 4.18",
+    "test_metrics": {
+      "n_test": 200,
+      "r2": 0.8818659853592531,
+      "rmse": 5.361580187617819,
+      "mae": 4.1789948661732765,
+      "mape": 9.400979884015348,
+      "residual_std": 5.354809965375507
+    }
+  },
+  "performance_level": {
+    "model": "hist_gradient_boosting",
+    "version": "20260911-224015",
+    "cv_metric": "f1_macro",
+    "cv_score": 0.9708120988804751,
+    "headline": "accuracy 0.985 \u00b7 macro-F1 0.985",
+    "test_metrics": {
+      "n_test": 200,
+      "accuracy": 0.985,
+      "balanced_accuracy": 0.9876795548742406,
+      "f1_macro": 0.9851587716656893,
+      "f1_weighted": 0.9849942788316772,
+      "roc_auc_ovr": 0.9995583254505949,
+      "log_loss": 0.05039196573181402
+    }
+  }
+}
