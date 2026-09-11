@@ -31,3 +31,7 @@ Thumbs.db
 .vscode/
 .idea/
 .coverage
+
+# Stray screenshots in the project root
+/*.png
+/*.jpg

@@ -185,6 +185,17 @@ Requests are validated with Pydantic `Literal` enums, so an unknown category ret
 
 Six pages: Overview (KPIs and interactive EDA), Leaderboard (CV bars with error bars, tuned parameters, hold-out diagnostics), Predict (form, probability gauge, SHAP contributions), Explainability, Fairness, and Model cards.
 
+<table>
+<tr>
+<td><img src="docs/screenshots/overview.jpg" alt="Overview page"/></td>
+<td><img src="docs/screenshots/leaderboard.jpg" alt="Leaderboard page"/></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/predict.jpg" alt="Predict page with SHAP contributions"/></td>
+<td><img src="docs/screenshots/fairness.jpg" alt="Fairness audit page"/></td>
+</tr>
+</table>
+
 ## Project structure
 
 ```
