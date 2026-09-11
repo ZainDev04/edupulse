@@ -171,6 +171,36 @@ def model_info(task: str, request: Request):
     return _svc(request).info(task)
 
 
+@app.get("/models/{task}/leaderboard", tags=["meta"])
+def model_leaderboard(task: str, request: Request):
+    """Cross-validation leaderboard of every candidate model for the task."""
+    if task.replace("-", "_") not in TASKS:
+        raise HTTPException(404, f"Unknown task '{task}'")
+    return {"task": task.replace("-", "_"), "rows": _svc(request).leaderboard(task)}
+
+
+@app.get("/models/{task}/fairness", tags=["meta"])
+def model_fairness(task: str, request: Request):
+    """Subgroup metrics and parity gaps from the hold-out audit."""
+    if task.replace("-", "_") not in TASKS:
+        raise HTTPException(404, f"Unknown task '{task}'")
+    return _svc(request).fairness(task)
+
+
+@app.get("/models/{task}/importance", tags=["meta"])
+def model_importance(task: str, request: Request):
+    """Global SHAP and permutation importance."""
+    if task.replace("-", "_") not in TASKS:
+        raise HTTPException(404, f"Unknown task '{task}'")
+    return _svc(request).importance(task)
+
+
+@app.get("/stats", tags=["meta"])
+def dataset_stats(request: Request):
+    """Headline dataset statistics and at-risk rates by background attribute."""
+    return _svc(request).dataset_stats()
+
+
 @app.post("/predict/at-risk", response_model=AtRiskPrediction, tags=["predict"])
 def predict_at_risk(student: StudentBackground, request: Request, explain: bool = Query(False)):
     """Probability that a student will average below 60 - from background only."""

@@ -6,15 +6,16 @@ Student performance intelligence platform: early-warning risk scoring, cross-sub
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4%2B-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688?logo=fastapi&logoColor=white)](api/main.py)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](web/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-dashboard-FF4B4B?logo=streamlit&logoColor=white)](app/dashboard.py)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](Dockerfile)
-[![Tests](https://img.shields.io/badge/tests-41_passing-brightgreen?logo=pytest&logoColor=white)](tests/)
+[![Tests](https://img.shields.io/badge/tests-42_passing-brightgreen?logo=pytest&logoColor=white)](tests/)
 [![Ruff](https://img.shields.io/badge/code_style-ruff-D7FF64?logo=ruff&logoColor=black)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 ## What it does
 
-EduPulse takes the well-known Students Performance dataset (1,000 students, five background attributes, three exam scores) and builds a complete machine learning system around it. A single training command benchmarks ten model families with repeated cross-validation, tunes the winner with Optuna, picks a decision threshold from a recall target, explains predictions with SHAP, audits subgroup fairness, writes a model card, and registers the artefacts. A FastAPI service and a Streamlit dashboard serve the registered models. Everything is covered by 41 tests and a GitHub Actions workflow.
+EduPulse takes the well-known Students Performance dataset (1,000 students, five background attributes, three exam scores) and builds a complete machine learning system around it. A single training command benchmarks ten model families with repeated cross-validation, tunes the winner with Optuna, picks a decision threshold from a recall target, explains predictions with SHAP, audits subgroup fairness, writes a model card, and registers the artefacts. A FastAPI service and a Streamlit dashboard serve the registered models. Everything is covered by 42 tests and a GitHub Actions workflow.
 
 The project answers three questions:
 
@@ -143,7 +144,7 @@ edupulse data profile
 ### Docker
 
 ```bash
-docker compose up --build     # trains at build time, then serves the API on :8000 and the dashboard on :8501
+docker compose up --build     # trains at build time, then serves the API on :8000, the web app on :3000 and Streamlit on :8501
 ```
 
 ## API
@@ -174,6 +175,8 @@ curl -X POST "http://localhost:8000/predict/at-risk?explain=true" \
 |---|---|---|
 | GET | `/health` | liveness and registered model versions |
 | GET | `/models`, `/models/{task}` | metadata, metrics, threshold, features |
+| GET | `/models/{task}/leaderboard`, `/fairness`, `/importance` | CV leaderboard, subgroup audit, SHAP and permutation importance |
+| GET | `/stats` | dataset headline figures and at-risk rate by group |
 | POST | `/predict/at-risk` | early-warning probability, risk band, optional SHAP |
 | POST | `/predict/math-score` | expected math score |
 | POST | `/predict/performance-level` | low, medium or high with class probabilities |
@@ -181,9 +184,25 @@ curl -X POST "http://localhost:8000/predict/at-risk?explain=true" \
 
 Requests are validated with Pydantic `Literal` enums, so an unknown category returns 422. Every response has an `X-Process-Time-ms` header. A missing model returns 503 with a hint on how to train it.
 
-## Dashboard
+## Web app
 
-Six pages: Overview (KPIs and interactive EDA), Leaderboard (CV bars with error bars, tuned parameters, hold-out diagnostics), Predict (form, probability gauge, SHAP contributions), Explainability, Fairness, and Model cards.
+A Next.js 16 frontend under [`web/`](web/) built with Tailwind 4, shadcn/ui and Recharts on top of the REST API. Five pages: Overview (KPIs, registered models, risk by group), Predict (form, probability gauge with the decision threshold marked, SHAP contributions), Leaderboard, Explainability and Fairness. Server components read from the API directly; the Predict form goes through a `/api/*` proxy route.
+
+```bash
+cd web && npm install
+API_URL=http://localhost:8000 npm run dev      # http://localhost:3000, with `edupulse serve` running
+```
+
+<table>
+<tr>
+<td><img src="docs/screenshots/web-predict.jpg" alt="Web app, predict page"/></td>
+<td><img src="docs/screenshots/web-leaderboard.jpg" alt="Web app, leaderboard page"/></td>
+</tr>
+</table>
+
+## Streamlit dashboard
+
+An in-process dashboard that uses the same prediction service without an HTTP hop. Six pages: Overview (KPIs and interactive EDA), Leaderboard, Predict, Explainability, Fairness, and Model cards.
 
 <table>
 <tr>
@@ -200,6 +219,7 @@ Six pages: Overview (KPIs and interactive EDA), Leaderboard (CV bars with error 
 
 ```
 api/main.py                 FastAPI service
+web/                        Next.js frontend (Tailwind, shadcn/ui, Recharts)
 app/dashboard.py            Streamlit dashboard
 src/edupulse/               the library (see docs/architecture.md)
   data/                     loader, schema
@@ -210,7 +230,7 @@ src/edupulse/               the library (see docs/architecture.md)
   serving.py                prediction service shared by CLI, API and dashboard
   eda.py, cli.py, config.py
 notebooks/                  01_eda, 02_modelling, 03_explainability_fairness (generated and executed)
-tests/                      41 pytest tests (unit, end-to-end, API)
+tests/                      42 pytest tests (unit, end-to-end, API)
 scripts/build_notebooks.py  notebooks as code
 models/                     versioned artefacts and model cards (generated)
 reports/                    figures, EDA profile, summary.json (generated)
@@ -226,7 +246,7 @@ make test      # pytest with coverage
 make lint      # ruff check and format check
 ```
 
-CI runs lint, then the test suite on Ubuntu and Windows with Python 3.11 and 3.12, then a fast end-to-end training run with a live API smoke test, then a Docker build.
+CI runs lint, then the test suite on Ubuntu and Windows with Python 3.11 and 3.12, then a fast end-to-end training run with a live API smoke test, a lint, type-check and build of the web app, and a Docker build.
 
 ## Configuration
 
@@ -246,7 +266,6 @@ The at-risk score is a triage signal for prioritising support. It is never a jud
 - Conformal prediction intervals for `math_score`
 - Fairness mitigation (threshold equalisation or reweighing) with a before and after audit
 - Drift monitoring on the inference stream
-- A Next.js frontend on top of the API
 
 ## Author
 

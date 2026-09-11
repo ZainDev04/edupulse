@@ -29,6 +29,7 @@ flowchart LR
     FAIR --> REG
     REG --> SVC[serving.PredictionService]
     SVC --> API[FastAPI<br/>/predict/*]
+    API --> WEB[Next.js web app]
     SVC --> UI[Streamlit dashboard]
     SVC --> CLI[Typer CLI]
 ```
@@ -92,10 +93,12 @@ Because pre-processing is inside the pipeline, the API accepts raw, human-readab
 
 FastAPI wraps it with typed request models (`Literal` enums for every categorical field), CORS, a timing header, a batch endpoint capped at 1,000 rows, and 422/503 error mapping.
 
+The Next.js app under `web/` consumes the REST API. Its pages are server components that fetch from `API_URL` at request time; the Predict form runs in the browser and calls a `/api/*` route that proxies to the backend. Theme tokens come from `design-system/edupulse/MASTER.md`.
+
 The Streamlit dashboard uses the same service in-process (no HTTP hop) for EDA, leaderboards, live prediction, explanations, fairness and model cards.
 
 ## 8. Quality gates
 
-- `pytest`: 41 tests covering schema, features, tasks, the zoo, thresholding, explainers, fairness, registry round-trip, the end-to-end pipeline and the REST API (through `TestClient`).
+- `pytest`: 42 tests covering schema, features, tasks, the zoo, thresholding, explainers, fairness, registry round-trip, the end-to-end pipeline and the REST API (through `TestClient`).
 - `ruff`: lint and format.
-- GitHub Actions: lint, then the test matrix (Ubuntu and Windows, Python 3.11 and 3.12), then a fast training run with an API curl smoke test, then a Docker build.
+- GitHub Actions: lint, then the test matrix (Ubuntu and Windows, Python 3.11 and 3.12), then a fast training run with an API curl smoke test, a lint, type-check and build of the web app, then a Docker build.

@@ -111,3 +111,15 @@ def test_service_ignores_null_optional_fields(trained_at_risk, fast_settings):
     svc = PredictionService(fast_settings.models_dir)
     out = svc.predict("at_risk", [{**STUDENT, "math_score": None, "reading_score": None, "writing_score": None}])
     assert 0 <= out[0]["probability"] <= 1
+
+
+def test_meta_endpoints(client):
+    r = client.get("/models/at-risk/leaderboard")
+    assert r.status_code == 200 and r.json()["rows"][0]["rank"] == 1
+    r = client.get("/models/at-risk/fairness")
+    assert r.status_code == 200 and "summary" in r.json()
+    r = client.get("/models/at-risk/importance")
+    assert r.status_code == 200 and r.json()["shap"]
+    r = client.get("/stats")
+    assert r.status_code == 200 and 0 < r.json()["at_risk_rate"] < 1 and "lunch" in r.json()["by_attribute"]
+    assert client.get("/models/nope/leaderboard").status_code == 404

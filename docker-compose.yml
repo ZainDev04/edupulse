@@ -18,3 +18,15 @@ services:
     ports:
       - "8501:8501"
     restart: unless-stopped
+
+  web:
+    build: ./web
+    image: edupulse-web:latest
+    container_name: edupulse-web
+    depends_on:
+      - api
+    environment:
+      - API_URL=http://api:8000
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

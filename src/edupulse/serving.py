@@ -78,6 +78,54 @@ class PredictionService:
             "test_metrics": {k: v for k, v in md.test_metrics.items() if isinstance(v, (int, float))},
             "created_at": md.created_at,
             "leakage_note": m.task.leakage_note,
+            "primary_metric": m.task.primary_metric,
+        }
+
+    def leaderboard(self, task_name: str) -> list[dict[str, Any]]:
+        """Cross-validation leaderboard rows for the latest model of ``task_name``."""
+        m = self.model(task_name)
+        board = pd.read_csv(m.path / "leaderboard.csv")
+        return board.to_dict(orient="records")
+
+    def fairness(self, task_name: str) -> dict[str, Any]:
+        """Subgroup metrics and gap summary recorded at training time."""
+        f = self.model(task_name).metadata.fairness
+        return {"groups": f.get("groups", []), "summary": f.get("summary", {})}
+
+    def importance(self, task_name: str) -> dict[str, Any]:
+        """Global SHAP and permutation importance recorded at training time."""
+        e = self.model(task_name).metadata.explainability
+        return {
+            "shap": e.get("shap_importance", []),
+            "permutation": e.get("permutation_importance", []),
+            "shap_kind": e.get("shap_kind"),
+        }
+
+    def dataset_stats(self) -> dict[str, Any]:
+        """Headline statistics of the training data plus group breakdowns."""
+        df = _full_frame()
+        scores = ["math_score", "reading_score", "writing_score"]
+        by_attr = {}
+        for attr in ("lunch", "test_preparation_course", "parental_level_of_education", "race_ethnicity", "gender"):
+            g = df.groupby(attr, observed=True)
+            by_attr[attr] = [
+                {
+                    "group": str(k),
+                    "n": int(len(v)),
+                    "at_risk_rate": float(v["at_risk"].mean()),
+                    "avg_score": float(v["average_score"].mean()),
+                }
+                for k, v in g
+            ]
+        return {
+            "n_students": int(len(df)),
+            "at_risk_rate": float(df["at_risk"].mean()),
+            "average_score": float(df["average_score"].mean()),
+            "score_means": {c: float(df[c].mean()) for c in scores},
+            "performance_level_share": {
+                k: float(v) for k, v in df["performance_level"].value_counts(normalize=True).items()
+            },
+            "by_attribute": by_attr,
         }
 
     # ------------------------------------------------------------------ #
@@ -138,8 +186,13 @@ class PredictionService:
 
 
 @lru_cache(maxsize=1)
+def _full_frame() -> pd.DataFrame:
+    return load_engineered()
+
+
+@lru_cache(maxsize=1)
 def _background_frame() -> pd.DataFrame:
-    return load_engineered().sample(200, random_state=0)
+    return _full_frame().sample(200, random_state=0)
 
 
 @lru_cache(maxsize=1)

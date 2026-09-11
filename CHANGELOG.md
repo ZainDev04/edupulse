@@ -14,7 +14,7 @@ Notable changes to this project are recorded here. The format follows [Keep a Ch
 - Typer CLI: `edupulse data validate | eda | train | evaluate | leaderboard | predict | serve | dashboard`.
 - Notebooks generated from `scripts/build_notebooks.py` and executed.
 - Docker multi-stage image, docker-compose, GitHub Actions CI (lint, test matrix, training smoke test, Docker build), pre-commit.
-- 41 pytest tests.
+- 42 pytest tests.
 
 ### Changed
 - Replaced the original single-notebook random forest project (kept under `legacy/`) with a modular codebase.
