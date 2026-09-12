@@ -2,6 +2,17 @@
 
 Notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.5.0] - 2026-09-12
+
+### Added
+- Public landing page at `/` in the web app: dark hero, numbered sections on the leakage problem, results, a live scoring demo, the pipeline and responsible use; headline numbers read from the API with committed fallbacks.
+- Hosting: the site on Vercel (edupulse-ml.vercel.app) and the API on Render from `render.yaml` and `deploy/api/Dockerfile`, which ships the committed pipelines with pinned library versions. Live links in the README.
+
+### Changed
+- App pages moved under `/overview`, `/predict` and so on; new type system (Playfair Display, Inter, JetBrains Mono) and a violet accent.
+- The fitted `pipeline.joblib` files are now committed (0.5 MB) so hosted numbers match the model cards.
+- `allowedDevOrigins` in `next.config.ts` so `next dev` also works from 127.0.0.1.
+
 ## [1.4.0] - 2026-09-12
 
 ### Added
