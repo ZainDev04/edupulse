@@ -1,0 +1,16 @@
+# Render blueprint: https://render.com/deploy?repo=https://github.com/ZainDev04/edupulse
+services:
+  - type: web
+    name: edupulse-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./deploy/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: EDUPULSE_TRACKING
+        value: "false"
+      - key: EDUPULSE_LOG_LEVEL
+        value: INFO

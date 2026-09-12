@@ -19,10 +19,9 @@ coverage.xml
 # Environment
 .env
 
-# Data & artefacts - figures, model cards and metadata are committed so the README renders;
-# only the binary pipelines and the processed snapshot are regenerated via `edupulse train --all`
+# Data & artefacts. Figures, model cards, metadata and the (small) fitted pipelines are committed so the README
+# renders and the hosted API serves exactly the models the cards describe. Regenerate with `edupulse train --all`.
 data/processed/
-models/**/*.joblib
 mlruns/
 
 # OS / IDE
