@@ -2,6 +2,8 @@
 
 Student performance intelligence platform: early-warning risk scoring, cross-subject score prediction, explainable and fairness-audited machine learning, served through a REST API and an interactive dashboard.
 
+**Live:** [edupulse-ml.vercel.app](https://edupulse-ml.vercel.app) (site and app) and [edupulse-api-e1y6.onrender.com/docs](https://edupulse-api-e1y6.onrender.com/docs) (API). Both run on free tiers; the API sleeps after 15 idle minutes, so the first request can take up to a minute.
+
 [![CI](https://github.com/ZainDev04/edupulse/actions/workflows/ci.yml/badge.svg)](https://github.com/ZainDev04/edupulse/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4%2B-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org)
@@ -156,6 +158,10 @@ edupulse data profile
 docker compose up --build     # trains at build time, then serves the API on :8000, the web app on :3000, Streamlit on :8501 and MLflow on :5000
 ```
 
+### Hosting
+
+The site is deployed to Vercel from `web/` (`vercel --prod`, with `API_URL` set to the API address). The API runs on Render from [`render.yaml`](render.yaml) and [`deploy/api/Dockerfile`](deploy/api/Dockerfile), which ships the committed `pipeline.joblib` files with pinned library versions instead of training at build time, so the hosted numbers match the model cards. Render redeploys on every push to `main`.
+
 ## API
 
 ```bash
@@ -287,7 +293,7 @@ models/                     versioned artefacts and model cards (generated)
 mlruns/                     MLflow store: SQLite database and run artefacts (generated, ignored)
 reports/                    figures, EDA profile, summary.json (generated)
 docs/architecture.md
-Dockerfile, docker-compose.yml, Makefile, .github/workflows/ci.yml, .pre-commit-config.yaml
+Dockerfile, docker-compose.yml, render.yaml, deploy/api/, Makefile, .github/workflows/ci.yml, .pre-commit-config.yaml
 legacy/                     the original 5th-semester notebook and report
 ```
 
