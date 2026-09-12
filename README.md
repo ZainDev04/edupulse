@@ -9,7 +9,7 @@ Student performance intelligence platform: early-warning risk scoring, cross-sub
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](web/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-dashboard-FF4B4B?logo=streamlit&logoColor=white)](app/dashboard.py)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](Dockerfile)
-[![Tests](https://img.shields.io/badge/tests-42_passing-brightgreen?logo=pytest&logoColor=white)](tests/)
+[![Tests](https://img.shields.io/badge/tests-63_passing-brightgreen?logo=pytest&logoColor=white)](tests/)
 [![Ruff](https://img.shields.io/badge/code_style-ruff-D7FF64?logo=ruff&logoColor=black)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
@@ -33,7 +33,7 @@ Hold-out split is 200 students (20%, stratified). Cross-validation is 5-fold wit
 
 | Task | Best model | CV score | Hold-out |
 |---|---|---|---|
-| At-risk early warning | Logistic regression (tuned C) | ROC-AUC 0.742 ± 0.034 | ROC-AUC 0.699, PR-AUC 0.519 (prevalence 0.285), recall 0.74 at threshold 0.42 |
+| At-risk early warning | Logistic regression (tuned C) | ROC-AUC 0.742 ± 0.034 | ROC-AUC 0.699, PR-AUC 0.515 (prevalence 0.285), recall 0.74 at threshold 0.41; per-group thresholds lift recall to 0.88 |
 | Math-score prediction | Ridge (tuned alpha) | R² 0.867 ± 0.019 | R² 0.882, RMSE 5.36, MAE 4.18; 90% conformal interval (half-width 9.2) covers 88.5% |
 | Performance level | HistGradientBoosting (tuned) | macro-F1 0.971 | accuracy 0.985, macro-F1 0.985 |
 
@@ -115,6 +115,7 @@ flowchart LR
     REG --> API[FastAPI]
     REG --> UI[Streamlit]
     REG --> CLI[Typer CLI]
+    API --> MON[drift monitoring]
 ```
 
 Every persisted model is one `sklearn.Pipeline` (`FeatureEngineer`, then a `ColumnTransformer`, then the estimator), so the API accepts raw JSON and there is no train/serve skew. Design notes are in [`docs/architecture.md`](docs/architecture.md).
@@ -213,7 +214,7 @@ API_URL=http://localhost:8000 npm run dev      # http://localhost:3000, with `ed
 
 ## Streamlit dashboard
 
-An in-process dashboard that uses the same prediction service without an HTTP hop. Six pages: Overview (KPIs and interactive EDA), Leaderboard, Predict, Explainability, Fairness, and Model cards.
+An in-process dashboard that uses the same prediction service without an HTTP hop. Seven pages: Overview (KPIs and interactive EDA), Leaderboard, Predict, Explainability, Fairness, Monitoring (drift on an uploaded CSV) and Model cards.
 
 <table>
 <tr>
@@ -305,7 +306,7 @@ Every setting can be overridden with environment variables or a `.env` file (see
 
 ## Responsible use
 
-The at-risk score is a triage signal for prioritising support. It is never a judgement about a student. Sensitive attributes are used as inputs, and their effect is measured and published in every model card. Subgroup recall gaps are reported rather than hidden, and per-group thresholds that equalise recall across lunch groups are shipped next to the global threshold, with the before and after numbers in the model card. Equal recall is one fairness criterion among several; selection rates still differ because base rates differ.
+The at-risk score is a triage signal for prioritising support. It is never a judgement about a student. Sensitive attributes are used as inputs, and their effect is measured and published in every model card. Subgroup recall gaps are published, and per-group thresholds that equalise recall across lunch groups are shipped next to the global threshold, with the before and after numbers in the model card. Equal recall is one fairness criterion among several; selection rates still differ because base rates differ.
 
 ## Roadmap
 

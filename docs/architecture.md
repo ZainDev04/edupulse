@@ -74,7 +74,7 @@ ColumnTransformer                      one-hot for nominal columns, ordinal for 
 Estimator                              the tuned model
 ```
 
-Because pre-processing is inside the pipeline, the API accepts raw, human-readable JSON and there is no train/serve skew. Unknown categories are ignored at inference rather than crashing it.
+Because pre-processing is inside the pipeline, the API accepts raw, human-readable JSON and there is no train/serve skew. An unknown category at inference is ignored; it does not crash the request.
 
 ## 5. Training protocol
 
