@@ -108,7 +108,9 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
 
 function MitigationCard({ m, before, threshold }: { m: Mitigated; before: FairnessGroup[]; threshold: number | null }) {
   const b = new Map(before.filter((g) => g.attribute === m.attribute).map((g) => [g.group, g]));
-  const rows = m.groups.map((g) => ({ group: g.group, before: b.get(g.group), after: g, threshold: m.thresholds[g.group] }));
+  const rows = m.groups
+    .filter((g) => g.attribute === m.attribute)
+    .map((g) => ({ group: g.group, before: b.get(g.group), after: g, threshold: m.thresholds[g.group] }));
   const gapBefore = Object.fromEntries(before.filter((g) => g.attribute === m.attribute).map((g) => [g.group, g.tpr ?? 0]));
   const tprGapBefore = Math.max(...Object.values(gapBefore)) - Math.min(...Object.values(gapBefore));
   const tprGapAfter = m.summary[m.attribute]?.tpr_gap ?? 0;

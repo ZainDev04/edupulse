@@ -395,6 +395,7 @@ def page_fairness():
                 "selection after": r["selection_rate"],
             }
             for r in mit["groups"]
+            if r["attribute"] == attr
         ]
         st.dataframe(pd.DataFrame(rows).set_index("group").style.format("{:.3f}"), width="stretch")
         b, a = mit["overall_before"], mit["overall_after"]

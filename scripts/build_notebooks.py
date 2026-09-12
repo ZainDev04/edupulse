@@ -266,9 +266,27 @@ NB3 = nb(
         ("code", "p = m.metadata.figures.get('fairness')\nif p and Path(p).exists(): display(Image(p, width=900))"),
         (
             "md",
+            "### Mitigation: per-group thresholds\nThe same target-recall rule applied per lunch group on out-of-fold probabilities. "
+            "The model is unchanged; the table shows recall and selection rate under the global and the per-group thresholds.",
+        ),
+        (
+            "code",
+            "mit = m.metadata.fairness.get('mitigated')\n"
+            "if mit:\n"
+            "    before = {g['group']: g for g in m.metadata.fairness['groups'] if g['attribute'] == mit['attribute']}\n"
+            "    rows = [{'group': g['group'], 'threshold': mit['thresholds'][g['group']], 'recall before': before[g['group']]['tpr'], 'recall after': g['tpr'],\n"
+            "             'selection before': before[g['group']]['selection_rate'], 'selection after': g['selection_rate']} for g in mit['groups'] if g['attribute'] == mit['attribute']]\n"
+            "    display(pd.DataFrame(rows).set_index('group').style.format(precision=3))\n"
+            "    print('overall before', mit['overall_before']); print('overall after ', mit['overall_after'])\n"
+            "    p = mit.get('figure')\n"
+            "    if p and Path(p).exists(): display(Image(p, width=900))",
+        ),
+        (
+            "md",
             "## Takeaways\n* Income proxies (lunch, parental education) and test preparation dominate the risk score. Gender and ethnicity contribute less.\n"
             "* The model is a triage tool. SHAP explanations make each flag auditable by an advisor.\n"
-            "* Group TPR gaps are recorded in the model card. Group-specific thresholds and reweighing are the next steps for mitigation.",
+            "* One global threshold over-flags free/reduced-lunch students and misses half of the at-risk students on standard lunch. "
+            "Per-group thresholds close the recall gap and are shipped next to the global one; both flags come back from the API.",
         ),
     ],
 )

@@ -295,7 +295,7 @@ def render_model_card(task: Task, meta: ModelMetadata, leaderboard: pd.DataFrame
             "|---|---|---|---|---|---|---|",
         ]
         before = {g["group"]: g for g in meta.fairness.get("groups", []) if g["attribute"] == attr}
-        after = {g["group"]: g for g in mit["groups"]}
+        after = {g["group"]: g for g in mit["groups"] if g["attribute"] == attr}
         for g, t in mit["thresholds"].items():
             if g in before and g in after:
                 lines.append(
