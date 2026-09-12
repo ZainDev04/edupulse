@@ -37,6 +37,7 @@ export interface ModelInfo {
   test_metrics: Record<string, number>;
   created_at: string;
   leakage_note: string | null;
+  mlflow_run_id: string | null;
 }
 
 export interface Health {

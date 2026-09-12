@@ -10,6 +10,8 @@ Examples
     edupulse predict --task at_risk --gender female --lunch standard ...
     edupulse serve --port 8000
     edupulse dashboard
+    edupulse runs --task at_risk
+    edupulse ui
 """
 
 from __future__ import annotations
@@ -90,17 +92,15 @@ def train(
     folds: Annotated[int | None, typer.Option(help="CV folds.")] = None,
     repeats: Annotated[int | None, typer.Option(help="CV repeats.")] = None,
     version: Annotated[str | None, typer.Option(help="Explicit artefact version tag.")] = None,
+    no_track: Annotated[bool, typer.Option("--no-track", help="Do not record the run in MLflow.")] = False,
 ):
     """Train, tune, evaluate, explain, audit and register model(s)."""
     from edupulse.pipeline import run_all, run_pipeline
 
-    s = get_settings().model_copy(
-        update={
-            k: v
-            for k, v in {"n_trials": trials, "tune": not no_tune, "cv_folds": folds, "cv_repeats": repeats}.items()
-            if v is not None
-        }
-    )
+    overrides = {"n_trials": trials, "tune": not no_tune, "cv_folds": folds, "cv_repeats": repeats}
+    if no_track:
+        overrides["tracking"] = False
+    s = get_settings().model_copy(update={k: v for k, v in overrides.items() if v is not None})
     if not all_tasks and task is None:
         raise typer.BadParameter("Provide --task NAME or --all")
     if all_tasks:
@@ -111,6 +111,8 @@ def train(
     for name, o in outputs.items():
         typer.secho(f"[{name}] {o.training.best_candidate} -> {o.headline}", fg="green")
         typer.echo(f"        artefacts: {o.artefact_dir}")
+        if o.run_id:
+            typer.echo(f"        mlflow run: {o.run_id}")
 
 
 @app.command()
@@ -140,6 +142,46 @@ def leaderboard(
     board = pd.read_csv(m.path / "leaderboard.csv")
     cols = ["rank", "model", f"{m.task.primary_metric}_mean", f"{m.task.primary_metric}_std", "fit_seconds"]
     typer.echo(board[cols].to_string(index=False, float_format=lambda v: f"{v:.4f}"))
+
+
+@app.command()
+def runs(
+    task: Annotated[str | None, typer.Option(help="Filter by task name.")] = None,
+    limit: Annotated[int, typer.Option(help="Number of runs to show.")] = 20,
+):
+    """List MLflow runs (newest first)."""
+    from edupulse.models.tracking import mlflow_available, search_runs
+
+    if not mlflow_available():
+        typer.secho("mlflow is not installed. Run: pip install mlflow", fg="yellow")
+        raise typer.Exit(1)
+    df = search_runs(task, max_results=limit)
+    if df.empty:
+        typer.echo("No runs recorded yet. Train a model first.")
+        return
+    cols = ["run_id", "start_time", "run_name", "model", "cv_metric", "cv_score", "metrics.train_seconds"]
+    view = df[[c for c in cols if c in df.columns]].rename(columns={"metrics.train_seconds": "train_s"}).copy()
+    view["run_id"] = view["run_id"].str[:8]
+    view["start_time"] = view["start_time"].dt.strftime("%Y-%m-%d %H:%M")
+    typer.echo(view.to_string(index=False, float_format=lambda v: f"{v:.4f}"))
+    typer.echo("")
+    typer.echo(f"Tracking URI: {df['tracking_uri'].iloc[0]}  (open with: edupulse ui)")
+
+
+@app.command()
+def ui(port: int = 5000, host: str = "127.0.0.1"):
+    """Open the MLflow tracking UI on the local run store."""
+    from edupulse.models.tracking import ExperimentTracker, mlflow_available
+
+    if not mlflow_available():
+        typer.secho("mlflow is not installed. Run: pip install mlflow", fg="yellow")
+        raise typer.Exit(1)
+    uri = ExperimentTracker(get_settings(), enabled=False).tracking_uri
+    typer.echo(f"MLflow UI on http://{host}:{port} (store: {uri})")
+    subprocess.run(
+        [sys.executable, "-m", "mlflow", "ui", "--backend-store-uri", uri, "--host", host, "--port", str(port)],
+        check=False,
+    )
 
 
 @app.command()

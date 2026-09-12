@@ -79,6 +79,7 @@ class PredictionService:
             "created_at": md.created_at,
             "leakage_note": m.task.leakage_note,
             "primary_metric": m.task.primary_metric,
+            "mlflow_run_id": md.tracking.get("run_id"),
         }
 
     def leaderboard(self, task_name: str) -> list[dict[str, Any]]:

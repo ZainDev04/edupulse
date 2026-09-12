@@ -1,0 +1,310 @@
+{
+  "task": "performance_level",
+  "version": "20260912-054502",
+  "created_at": "2026-09-12T05:49:47+00:00",
+  "model_name": "hist_gradient_boosting",
+  "model_class": "HistGradientBoostingClassifier",
+  "best_params": {
+    "learning_rate": 0.018659959624904916,
+    "max_iter": 175,
+    "max_leaf_nodes": 36,
+    "min_samples_leaf": 29,
+    "l2_regularization": 0.0028585493941961923
+  },
+  "cv_metric": "f1_macro",
+  "cv_score": 0.9708120988804751,
+  "test_metrics": {
+    "n_test": 200,
+    "accuracy": 0.985,
+    "balanced_accuracy": 0.9876795548742406,
+    "f1_macro": 0.9851587716656893,
+    "f1_weighted": 0.9849942788316772,
+    "roc_auc_ovr": 0.9995583254505949,
+    "log_loss": 0.05039196573181402,
+    "confusion_matrix": [
+      [
+        56,
+        1,
+        0
+      ],
+      [
+        1,
+        101,
+        1
+      ],
+      [
+        0,
+        0,
+        40
+      ]
+    ],
+    "classification_report": {
+      "low": {
+        "precision": 0.9824561403508771,
+        "recall": 0.9824561403508771,
+        "f1-score": 0.9824561403508771,
+        "support": 57.0
+      },
+      "medium": {
+        "precision": 0.9901960784313726,
+        "recall": 0.9805825242718447,
+        "f1-score": 0.9853658536585366,
+        "support": 103.0
+      },
+      "high": {
+        "precision": 0.975609756097561,
+        "recall": 1.0,
+        "f1-score": 0.9876543209876543,
+        "support": 40.0
+      },
+      "accuracy": 0.985,
+      "macro avg": {
+        "precision": 0.9827539916266036,
+        "recall": 0.9876795548742406,
+        "f1-score": 0.9851587716656893,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.9850729316116691,
+        "recall": 0.985,
+        "f1-score": 0.9849942788316772,
+        "support": 200.0
+      }
+    }
+  },
+  "threshold": null,
+  "features": [
+    "gender",
+    "race_ethnicity",
+    "parental_level_of_education",
+    "lunch",
+    "test_preparation_course",
+    "math_score",
+    "reading_score",
+    "writing_score"
+  ],
+  "encoded_features": [
+    "gender_female",
+    "gender_male",
+    "race_ethnicity_group A",
+    "race_ethnicity_group B",
+    "race_ethnicity_group C",
+    "race_ethnicity_group D",
+    "race_ethnicity_group E",
+    "lunch_free/reduced",
+    "lunch_standard",
+    "test_preparation_course_completed",
+    "test_preparation_course_none",
+    "parental_level_of_education",
+    "math_score",
+    "reading_score",
+    "writing_score"
+  ],
+  "n_train": 800,
+  "n_test": 200,
+  "data_sha256": "1d32fe149100deae",
+  "train_seconds": 276.2313043000031,
+  "explainability": {
+    "permutation_importance": [
+      {
+        "feature": "math_score",
+        "importance_mean": 0.24560348586437358,
+        "importance_std": 0.03938981473278013
+      },
+      {
+        "feature": "reading_score",
+        "importance_mean": 0.2036028590346394,
+        "importance_std": 0.024929399884308086
+      },
+      {
+        "feature": "writing_score",
+        "importance_mean": 0.10880747456165496,
+        "importance_std": 0.014359958125662195
+      },
+      {
+        "feature": "gender",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "lunch",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "test_preparation_course",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "parental_level_of_education",
+        "importance_mean": -0.0017981728862707992,
+        "importance_std": 0.0036202507602989937
+      },
+      {
+        "feature": "race_ethnicity",
+        "importance_mean": -0.002279738708007628,
+        "importance_std": 0.002279738708007628
+      }
+    ],
+    "shap_importance": [
+      {
+        "feature": "reading_score",
+        "mean_abs_shap": 1.250098138788175
+      },
+      {
+        "feature": "math_score",
+        "mean_abs_shap": 0.8719803062909985
+      },
+      {
+        "feature": "writing_score",
+        "mean_abs_shap": 0.8415017470660086
+      },
+      {
+        "feature": "race_ethnicity",
+        "mean_abs_shap": 0.0385128553331795
+      },
+      {
+        "feature": "parental_level_of_education",
+        "mean_abs_shap": 0.03543201560396567
+      },
+      {
+        "feature": "lunch",
+        "mean_abs_shap": 0.02625377049072411
+      },
+      {
+        "feature": "test_preparation_course",
+        "mean_abs_shap": 0.003067470085924818
+      },
+      {
+        "feature": "gender",
+        "mean_abs_shap": 0.0028275542493902037
+      }
+    ],
+    "shap_kind": "tree"
+  },
+  "fairness": {
+    "groups": [
+      {
+        "attribute": "gender",
+        "group": "female",
+        "n": 95,
+        "accuracy": 0.9789473684210527
+      },
+      {
+        "attribute": "gender",
+        "group": "male",
+        "n": 105,
+        "accuracy": 0.9904761904761905
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group A",
+        "n": 19,
+        "accuracy": 0.9473684210526315
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group B",
+        "n": 46,
+        "accuracy": 1.0
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group C",
+        "n": 66,
+        "accuracy": 0.9848484848484849
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group D",
+        "n": 44,
+        "accuracy": 0.9772727272727273
+      },
+      {
+        "attribute": "race_ethnicity",
+        "group": "group E",
+        "n": 25,
+        "accuracy": 1.0
+      },
+      {
+        "attribute": "lunch",
+        "group": "free/reduced",
+        "n": 64,
+        "accuracy": 0.984375
+      },
+      {
+        "attribute": "lunch",
+        "group": "standard",
+        "n": 136,
+        "accuracy": 0.9852941176470589
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "associate's degree",
+        "n": 43,
+        "accuracy": 1.0
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "bachelor's degree",
+        "n": 27,
+        "accuracy": 1.0
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "high school",
+        "n": 41,
+        "accuracy": 0.9512195121951219
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "some college",
+        "n": 41,
+        "accuracy": 0.975609756097561
+      },
+      {
+        "attribute": "parental_level_of_education",
+        "group": "some high school",
+        "n": 41,
+        "accuracy": 1.0
+      }
+    ],
+    "summary": {
+      "gender": {
+        "accuracy_gap": 0.011528822055137833
+      },
+      "lunch": {
+        "accuracy_gap": 0.0009191176470588758
+      },
+      "parental_level_of_education": {
+        "accuracy_gap": 0.04878048780487809
+      },
+      "race_ethnicity": {
+        "accuracy_gap": 0.052631578947368474
+      }
+    },
+    "figure": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\fairness_subgroups.png"
+  },
+  "figures": {
+    "leaderboard": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\leaderboard.png",
+    "tuning": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\tuning_history.png",
+    "confusion": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\confusion_matrix.png",
+    "permutation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\permutation_importance.png",
+    "shap_bar": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\shap_importance.png",
+    "shap_beeswarm": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\shap_beeswarm.png",
+    "fairness": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\fairness_subgroups.png"
+  },
+  "environment": {
+    "python": "3.14.6",
+    "sklearn": "1.9.1",
+    "pandas": "3.0.5",
+    "edupulse": "1.0.0",
+    "platform": "Windows-10-10.0.19045-SP0"
+  },
+  "tracking": {
+    "run_id": "7399b0d6b6e2482c9c778efefc38cd28",
+    "experiment_id": "1",
+    "tracking_uri": "sqlite:///C:/Users/WzA/Desktop/ZAIN/PAI/mlruns/mlflow.db"
+  }
+}

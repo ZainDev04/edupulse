@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "edupulse"
-version = "1.0.0"
+version = "1.1.0"
 description = "EduPulse - production-grade student performance intelligence platform (early-warning, score prediction, explainability, fairness)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Shaikh Muhammad Zain" }]
-keywords = ["machine-learning", "education", "fastapi", "streamlit", "shap", "optuna", "mlops"]
+keywords = ["machine-learning", "education", "fastapi", "streamlit", "shap", "optuna", "mlflow", "mlops"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -35,8 +35,9 @@ dependencies = [
 boosting = ["xgboost>=2.0", "lightgbm>=4.1"]
 api = ["fastapi>=0.110", "uvicorn[standard]>=0.27", "httpx>=0.27"]
 dashboard = ["streamlit>=1.32", "plotly>=5.18"]
+tracking = ["mlflow>=2.12"]
 dev = ["pytest>=8", "pytest-cov>=4.1", "ruff>=0.4", "pre-commit>=3.6", "nbformat>=5.9", "jupyter>=1.0", "nbconvert>=7.10", "ipykernel>=6.29"]
-all = ["edupulse[boosting,api,dashboard,dev]"]
+all = ["edupulse[boosting,api,dashboard,tracking,dev]"]
 
 [project.scripts]
 edupulse = "edupulse.cli:app"

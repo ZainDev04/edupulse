@@ -1,4 +1,4 @@
-.PHONY: install install-dev data validate eda train train-fast test lint format serve dashboard docker clean notebooks
+.PHONY: install install-dev data validate eda train train-fast test lint format serve dashboard mlflow-ui runs docker clean notebooks
 
 PY ?= python
 
@@ -34,6 +34,12 @@ serve:
 
 dashboard:
 	edupulse dashboard
+
+mlflow-ui:
+	edupulse ui
+
+runs:
+	edupulse runs
 
 notebooks:
 	$(PY) scripts/build_notebooks.py && jupyter nbconvert --to notebook --execute --inplace notebooks/*.ipynb

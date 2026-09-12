@@ -107,6 +107,7 @@ flowchart LR
     EVAL --> FAIR[fairness audit]
     XAI --> REG[(model registry + model card)]
     FAIR --> REG
+    REG -.-> MLF[(MLflow runs)]
     REG --> API[FastAPI]
     REG --> UI[Streamlit]
     REG --> CLI[Typer CLI]
@@ -126,6 +127,7 @@ edupulse eda                      # EDA figures and statistical profile under re
 edupulse train --all --trials 50  # leaderboard, Optuna, evaluation, SHAP, fairness, registry
 edupulse serve                    # REST API at http://localhost:8000/docs
 edupulse dashboard                # Streamlit at http://localhost:8501
+edupulse ui                       # MLflow run history at http://localhost:5000
 ```
 
 <details>
@@ -136,6 +138,8 @@ edupulse train --task at_risk --no-tune --repeats 1   # fast run
 edupulse leaderboard --task math_score
 edupulse evaluate --task at_risk
 edupulse models
+edupulse runs --task at_risk                          # MLflow runs, newest first
+edupulse train --task at_risk --no-track              # skip MLflow for this run
 edupulse predict --task at_risk --gender male --lunch free/reduced --test-preparation-course none --explain
 edupulse data profile
 ```
@@ -144,7 +148,7 @@ edupulse data profile
 ### Docker
 
 ```bash
-docker compose up --build     # trains at build time, then serves the API on :8000, the web app on :3000 and Streamlit on :8501
+docker compose up --build     # trains at build time, then serves the API on :8000, the web app on :3000, Streamlit on :8501 and MLflow on :5000
 ```
 
 ## API
@@ -215,6 +219,18 @@ An in-process dashboard that uses the same prediction service without an HTTP ho
 </tr>
 </table>
 
+## Experiment tracking
+
+Every training run is recorded in MLflow next to the registry entry it produced: settings, tuned parameters, a CV score per zoo candidate, the Optuna objective per trial, hold-out metrics, fairness gaps, figures, the model card and the fitted pipeline. The registry stays the source of truth for serving; MLflow holds the history so runs can be compared.
+
+```bash
+edupulse train --task at_risk --trials 60   # recorded automatically
+edupulse runs --task at_risk                # table of runs, newest first
+edupulse ui                                 # MLflow UI on http://localhost:5000
+```
+
+The store is a SQLite file at `mlruns/mlflow.db` with artefacts under `mlruns/artifacts`. Set `EDUPULSE_TRACKING_URI` to a server URL to share runs, `EDUPULSE_TRACKING=false` (or `--no-track`) to switch tracking off. If `mlflow` is not installed the pipeline logs a warning and carries on.
+
 ## Project structure
 
 ```
@@ -224,15 +240,16 @@ app/dashboard.py            Streamlit dashboard
 src/edupulse/               the library (see docs/architecture.md)
   data/                     loader, schema
   features/                 engineering, preprocessing
-  models/                   zoo, train, evaluate, explain, fairness, registry
+  models/                   zoo, train, evaluate, explain, fairness, registry, tracking (MLflow)
   tasks.py                  task registry
   pipeline.py               end-to-end run
   serving.py                prediction service shared by CLI, API and dashboard
   eda.py, cli.py, config.py
 notebooks/                  01_eda, 02_modelling, 03_explainability_fairness (generated and executed)
-tests/                      42 pytest tests (unit, end-to-end, API)
+tests/                      48 pytest tests (unit, end-to-end, tracking, API)
 scripts/build_notebooks.py  notebooks as code
 models/                     versioned artefacts and model cards (generated)
+mlruns/                     MLflow store: SQLite database and run artefacts (generated, ignored)
 reports/                    figures, EDA profile, summary.json (generated)
 docs/architecture.md
 Dockerfile, docker-compose.yml, Makefile, .github/workflows/ci.yml, .pre-commit-config.yaml
@@ -250,7 +267,7 @@ CI runs lint, then the test suite on Ubuntu and Windows with Python 3.11 and 3.1
 
 ## Configuration
 
-Every setting can be overridden with environment variables or a `.env` file (see [`.env.example`](.env.example)): `EDUPULSE_N_TRIALS`, `EDUPULSE_CV_FOLDS`, `EDUPULSE_TARGET_RECALL`, `EDUPULSE_AT_RISK_THRESHOLD`, `EDUPULSE_TEST_SIZE` and others.
+Every setting can be overridden with environment variables or a `.env` file (see [`.env.example`](.env.example)): `EDUPULSE_N_TRIALS`, `EDUPULSE_CV_FOLDS`, `EDUPULSE_TARGET_RECALL`, `EDUPULSE_AT_RISK_THRESHOLD`, `EDUPULSE_TEST_SIZE`, `EDUPULSE_TRACKING_URI` and others.
 
 ## Dataset
 
@@ -262,7 +279,7 @@ The at-risk score is a triage signal for prioritising support. It is never a jud
 
 ## Roadmap
 
-- MLflow experiment tracking behind the registry
+- ~~MLflow experiment tracking behind the registry~~ (1.1.0)
 - Conformal prediction intervals for `math_score`
 - Fairness mitigation (threshold equalisation or reweighing) with a before and after audit
 - Drift monitoring on the inference stream

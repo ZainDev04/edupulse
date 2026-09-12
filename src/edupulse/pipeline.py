@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,7 @@ from edupulse.models.evaluate import evaluate_task, make_figures
 from edupulse.models.explain import explain_task
 from edupulse.models.fairness import audit_task
 from edupulse.models.registry import ModelRegistry, hash_dataframe
+from edupulse.models.tracking import ExperimentTracker
 from edupulse.models.train import TrainingResult, train_task
 from edupulse.tasks import TASKS, Task, get_task
 
@@ -32,6 +34,7 @@ class PipelineOutput:
     artefact_dir: Path
     explainability: dict[str, Any]
     fairness: dict[str, Any]
+    run_id: str | None = None
 
     @property
     def headline(self) -> str:
@@ -75,17 +78,46 @@ def run_pipeline(
     explain: bool = True,
     audit: bool = True,
     version: str | None = None,
+    tracker: ExperimentTracker | None = None,
 ) -> PipelineOutput:
-    """Train, evaluate and register a model for ``task_name``."""
+    """Train, evaluate and register a model for ``task_name``.
+
+    Every run is also recorded in MLflow (see :mod:`edupulse.models.tracking`) unless
+    tracking is disabled in the settings or ``mlflow`` is not installed.
+    """
     settings = settings or get_settings()
     task = get_task(task_name)
     registry = registry or ModelRegistry(settings.models_dir)
+    tracker = tracker or ExperimentTracker(settings)
     rules = rules_from_settings(settings)
+    version = version or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
 
+    with tracker.run(task, version):
+        return _run_tracked(task, settings, data_path, registry, tracker, rules, explain, audit, version)
+
+
+def _run_tracked(
+    task: Task,
+    settings: Settings,
+    data_path: str | Path | None,
+    registry: ModelRegistry,
+    tracker: ExperimentTracker,
+    rules: DomainRules,
+    explain: bool,
+    audit: bool,
+    version: str,
+) -> PipelineOutput:
+    """The body of :func:`run_pipeline`, executed inside the tracker's run context."""
     X_train, X_test, y_train, y_test, raw = prepare_data(task, settings, data_path)
+    data_sha256 = hash_dataframe(raw)
+    tracker.set_tags({"data_sha256": data_sha256, "registry_version": version})
+    tracker.log_params({"n_train": len(X_train), "n_test": len(X_test), "n_features": X_train.shape[1]})
+
     result = train_task(task, X_train, y_train, settings=settings, rules=rules)
+    tracker.log_training(result, task=task)
 
     metrics = evaluate_task(task, result.pipeline, X_test, y_test, threshold=result.threshold)
+    tracker.log_metrics(metrics, prefix="test_")
     log.info(
         "Hold-out metrics for %s: %s", task.name, {k: round(v, 4) for k, v in metrics.items() if isinstance(v, float)}
     )
@@ -115,6 +147,10 @@ def run_pipeline(
     figures.update(explainability.get("figures", {}))
     if fairness.get("figure"):
         figures["fairness"] = fairness["figure"]
+    if fairness.get("summary"):
+        tracker.log_metrics(
+            {f"fairness.{attr}.{m}": g for attr, gaps in fairness["summary"].items() for m, g in gaps.items()}
+        )
 
     artefact_dir = registry.save(
         task,
@@ -127,21 +163,25 @@ def run_pipeline(
         encoded_features=result.feature_names,
         n_train=len(X_train),
         n_test=len(X_test),
-        data_sha256=hash_dataframe(raw),
+        data_sha256=data_sha256,
         train_seconds=result.train_seconds,
         leaderboard=result.leaderboard,
         explainability={k: v for k, v in explainability.items() if k != "figures"},
         fairness=fairness,
         figures=figures,
         tuning_history=result.tuning_history,
+        tracking=tracker.info,
         version=version,
     )
+    tracker.log_artefact_dir(artefact_dir)
+    tracker.log_figures(figures)
+    tracker.log_model(result.pipeline, input_example=X_test)
 
     # Persist a processed snapshot for notebooks / dashboard
     settings.processed_dir.mkdir(parents=True, exist_ok=True)
     engineer_features(raw, rules).to_csv(settings.processed_dir / "students_engineered.csv", index=False)
 
-    return PipelineOutput(task, result, metrics, artefact_dir, explainability, fairness)
+    return PipelineOutput(task, result, metrics, artefact_dir, explainability, fairness, tracker.info.get("run_id"))
 
 
 def run_all(settings: Settings | None = None, **kwargs) -> dict[str, PipelineOutput]:
@@ -152,6 +192,7 @@ def run_all(settings: Settings | None = None, **kwargs) -> dict[str, PipelineOut
         name: {
             "model": o.training.best_candidate,
             "version": o.artefact_dir.name,
+            "mlflow_run_id": o.run_id,
             "cv_metric": o.task.primary_metric,
             "cv_score": o.training.cv_score,
             "headline": o.headline,

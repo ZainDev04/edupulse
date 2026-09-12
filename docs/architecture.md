@@ -27,6 +27,7 @@ flowchart LR
     EVAL --> REG[(models.registry<br/>pipeline.joblib, metadata.json, model_card.md)]
     XAI --> REG
     FAIR --> REG
+    REG -.-> MLF[(models.tracking<br/>MLflow runs in mlruns/)]
     REG --> SVC[serving.PredictionService]
     SVC --> API[FastAPI<br/>/predict/*]
     API --> WEB[Next.js web app]
@@ -56,6 +57,7 @@ src/edupulse/
     explain.py         SHAP (tree, linear and kernel explainers) with one-hot aggregation
     fairness.py        subgroup metrics, parity gaps, disparate-impact ratio
     registry.py        versioned artefact store and model-card renderer
+    tracking.py        MLflow experiment tracking (optional, no-op when mlflow is absent)
 ```
 
 ## 4. The inference pipeline object
@@ -78,6 +80,7 @@ Because pre-processing is inside the pipeline, the API accepts raw, human-readab
 4. Threshold (binary tasks only). Out-of-fold probabilities from a fresh 5-fold CV pick the highest threshold that still reaches the configured target recall (default 80%).
 5. Final fit on the full training split. Hold-out metrics, figures, SHAP values, permutation importance and the fairness audit are computed on the test split only.
 6. Register. Artefacts are written to `models/<task>/<version>/` and `latest.json` is updated.
+7. Track. The whole run is also logged to MLflow: settings and tuned parameters, one metric per zoo candidate, the Optuna objective per trial as a step series, hold-out metrics (`test_*`), fairness gaps, figures, the model card and the pipeline as an MLflow model. The run id goes into `metadata.json`, so a registry version and its MLflow run point at each other. The store is SQLite at `mlruns/mlflow.db` (`EDUPULSE_TRACKING_URI` can point at a server); the registry stays the source of truth for serving, MLflow is the history.
 
 ## 6. Why three tasks
 
@@ -99,6 +102,6 @@ The Streamlit dashboard uses the same service in-process (no HTTP hop) for EDA, 
 
 ## 8. Quality gates
 
-- `pytest`: 42 tests covering schema, features, tasks, the zoo, thresholding, explainers, fairness, registry round-trip, the end-to-end pipeline and the REST API (through `TestClient`).
+- `pytest`: 48 tests covering schema, features, tasks, the zoo, thresholding, explainers, fairness, registry round-trip, MLflow tracking, the end-to-end pipeline and the REST API (through `TestClient`).
 - `ruff`: lint and format.
 - GitHub Actions: lint, then the test matrix (Ubuntu and Windows, Python 3.11 and 3.12), then a fast training run with an API curl smoke test, a lint, type-check and build of the web app, then a Docker build.

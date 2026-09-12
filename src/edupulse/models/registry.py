@@ -57,6 +57,7 @@ class ModelMetadata:
     fairness: dict[str, Any] = field(default_factory=dict)
     figures: dict[str, str] = field(default_factory=dict)
     environment: dict[str, str] = field(default_factory=dict)
+    tracking: dict[str, str] = field(default_factory=dict)
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), indent=2, default=str)
@@ -116,6 +117,7 @@ class ModelRegistry:
         fairness: dict[str, Any] | None = None,
         figures: dict[str, str] | None = None,
         tuning_history: pd.DataFrame | None = None,
+        tracking: dict[str, str] | None = None,
         version: str | None = None,
     ) -> Path:
         version = version or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
@@ -143,6 +145,7 @@ class ModelRegistry:
             fairness=fairness or {},
             figures=figures or {},
             environment=_environment(),
+            tracking=tracking or {},
         )
         joblib.dump(pipeline, d / "pipeline.joblib", compress=3)
         (d / "metadata.json").write_text(meta.to_json(), encoding="utf-8")
@@ -209,8 +212,10 @@ def render_model_card(task: Task, meta: ModelMetadata, leaderboard: pd.DataFrame
         f"**Selected model:** `{meta.model_name}` ({meta.model_class})  ",
         f"**Created:** {meta.created_at}  ",
         f"**Training data hash:** `{meta.data_sha256}` · {meta.n_train} train / {meta.n_test} test rows  ",
-        "",
     ]
+    if meta.tracking.get("run_id"):
+        lines.append(f"**MLflow run:** `{meta.tracking['run_id']}` (experiment {meta.tracking.get('experiment_id')})  ")
+    lines.append("")
     if task.leakage_note:
         lines += ["> Leakage note: " + task.leakage_note, ""]
     lines += ["## Intended use", "", _intended_use(task), ""]

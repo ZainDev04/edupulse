@@ -71,6 +71,7 @@ export default async function OverviewPage() {
                   <TableHead>Model</TableHead>
                   <TableHead>Cross-validation</TableHead>
                   <TableHead>Hold-out</TableHead>
+                  <TableHead>Version</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -93,6 +94,10 @@ export default async function OverviewPage() {
                         {m.cv_metric} {fmt(m.cv_score)}
                       </TableCell>
                       <TableCell className="font-mono text-xs">{headline(m.kind, m.test_metrics)}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {m.version}
+                        {m.mlflow_run_id && <div title={m.mlflow_run_id}>run {m.mlflow_run_id.slice(0, 8)}</div>}
+                      </TableCell>
                     </TableRow>
                   );
                 })}

@@ -2,6 +2,13 @@
 
 Notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.0] - 2026-09-12
+
+### Added
+- MLflow experiment tracking behind the model registry (`edupulse.models.tracking`). Every `run_pipeline` call records settings, tuned parameters, CV leaderboard scores, the Optuna trial curve, hold-out metrics, fairness gaps, figures, the model card and the fitted pipeline (cloudpickle) to a SQLite store under `mlruns/`. The run id is written into `metadata.json`, the model card and `/models/{task}`.
+- `edupulse runs` lists recorded runs; `edupulse ui` opens the MLflow UI; `edupulse train --no-track` or `EDUPULSE_TRACKING=false` switches tracking off. Missing `mlflow` degrades to a no-op with a warning.
+- `mlflow` service in docker-compose on port 5000, `tracking` extra in `pyproject.toml`, 6 new tests (48 total).
+
 ## [1.0.0] - 2026-09-12
 
 ### Added

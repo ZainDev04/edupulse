@@ -50,6 +50,12 @@ class Settings(BaseSettings):
     medium_cutoff: int = 60
     high_cutoff: int = 80
 
+    # --- Experiment tracking (MLflow) -----------------------------------
+    tracking: bool = True
+    tracking_uri: str = "sqlite:///" + (PROJECT_ROOT / "mlruns" / "mlflow.db").as_posix()
+    tracking_artifacts: Path = PROJECT_ROOT / "mlruns" / "artifacts"
+    tracking_experiment: str = "edupulse"
+
     # --- Serving ---------------------------------------------------------
     api_host: str = "0.0.0.0"
     api_port: int = 8000
