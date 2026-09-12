@@ -2,6 +2,14 @@
 
 Notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.3.0] - 2026-09-12
+
+### Added
+- Fairness mitigation for `at_risk` (`edupulse.models.mitigation`): per-group decision thresholds on `lunch` chosen on out-of-fold probabilities so every group reaches the target recall. On the real data the hold-out recall gap drops from 0.447 to 0.031 and overall recall rises from 0.74 to 0.88 at a similar flagged share.
+- Before and after audit in `audit_task`: subgroup metrics under both rules, overall recall, precision and flagged share, a `fairness_mitigation.png` figure, and a model-card section. `EDUPULSE_FAIRNESS_ATTRIBUTE` picks the attribute (empty disables).
+- `/predict/at-risk` returns a `mitigated` flag next to the global one; the web predict form and fairness page and the Streamlit dashboard show the comparison.
+- 4 new tests (57 total).
+
 ## [1.2.0] - 2026-09-12
 
 ### Added

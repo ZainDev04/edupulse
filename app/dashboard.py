@@ -268,6 +268,12 @@ def page_predict():
         c2.markdown(
             f"Flag for intervention: {'yes' if res['at_risk'] else 'no'}  \nDecision threshold: {res['threshold']:.2f}  \nModel version: `{res['model_version']}`"
         )
+        if res.get("mitigated"):
+            m = res["mitigated"]
+            c2.markdown(
+                f"With the {m['attribute']}-equalised threshold ({m['threshold']:.2f}): "
+                f"{'flagged' if m['at_risk'] else 'not flagged'}"
+            )
         c2.info("This is a triage signal for prioritising support. It is not a judgement about the student.")
     elif t.kind == "regression":
         st.metric("Predicted math score", f"{res['prediction']:.1f} / 100")
@@ -375,6 +381,28 @@ def page_fairness():
     st.plotly_chart(fig, width="stretch")
     st.markdown("#### Gap summary (max minus min across groups)")
     st.json(fair.get("summary", {}).get(attr, {}))
+    mit = fair.get("mitigated")
+    if mit and mit["attribute"] == attr:
+        st.markdown(f"#### Mitigation: recall equalised across {attr}")
+        before = {r["group"]: r for r in fair["groups"] if r["attribute"] == attr}
+        rows = [
+            {
+                "group": r["group"],
+                "threshold": mit["thresholds"].get(r["group"]),
+                "recall before": before.get(r["group"], {}).get("tpr"),
+                "recall after": r["tpr"],
+                "selection before": before.get(r["group"], {}).get("selection_rate"),
+                "selection after": r["selection_rate"],
+            }
+            for r in mit["groups"]
+        ]
+        st.dataframe(pd.DataFrame(rows).set_index("group").style.format("{:.3f}"), width="stretch")
+        b, a = mit["overall_before"], mit["overall_after"]
+        st.caption(
+            f"Overall recall {b['recall']:.3f} to {a['recall']:.3f}, precision {b['precision']:.3f} to {a['precision']:.3f}, "
+            f"flagged {b['flagged_rate']:.1%} to {a['flagged_rate']:.1%}. Per-group thresholds are chosen on "
+            "out-of-fold probabilities so that every group reaches the target recall; the model is unchanged."
+        )
     st.caption(
         "Selection-rate and TPR gaps quantify demographic-parity and equal-opportunity differences. "
         "A disparate-impact ratio below 0.8 is the conventional 'four-fifths rule' warning level. "

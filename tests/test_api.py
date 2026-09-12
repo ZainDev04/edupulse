@@ -71,6 +71,7 @@ def test_predict_at_risk(client):
     body = r.json()
     assert 0 <= body["probability"] <= 1 and isinstance(body["at_risk"], bool)
     assert body["risk_band"] in {"low", "moderate", "high", "critical"}
+    assert body["mitigated"]["attribute"] == "lunch" and isinstance(body["mitigated"]["at_risk"], bool)
     assert "X-Process-Time-ms" in r.headers
 
 

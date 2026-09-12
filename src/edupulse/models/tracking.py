@@ -163,6 +163,10 @@ class ExperimentTracker:
         if result.conformal is not None:
             self.log_params({"conformal_alpha": result.conformal.alpha})
             self.log_metrics({"conformal_half_width": result.conformal.quantile})
+        if result.group_thresholds is not None:
+            gt = result.group_thresholds
+            self.log_params({"fairness_attribute": gt.attribute})
+            self.log_metrics({f"group_threshold.{g}": t for g, t in gt.thresholds.items()})
 
         # one metric per zoo candidate so the leaderboard is comparable across runs in the UI
         board: pd.DataFrame = result.leaderboard

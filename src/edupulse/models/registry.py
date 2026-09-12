@@ -31,6 +31,7 @@ from edupulse import __version__
 from edupulse.config import get_settings
 from edupulse.logging_utils import get_logger
 from edupulse.models.conformal import ConformalInterval
+from edupulse.models.mitigation import GroupThresholds
 from edupulse.tasks import Task, get_task
 
 log = get_logger(__name__)
@@ -60,6 +61,7 @@ class ModelMetadata:
     environment: dict[str, str] = field(default_factory=dict)
     tracking: dict[str, str] = field(default_factory=dict)
     conformal: dict[str, Any] = field(default_factory=dict)
+    group_thresholds: dict[str, Any] = field(default_factory=dict)
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), indent=2, default=str)
@@ -79,6 +81,10 @@ class LoadedModel:
     @property
     def interval(self) -> ConformalInterval | None:
         return ConformalInterval.from_dict(self.metadata.conformal) if self.metadata.conformal else None
+
+    @property
+    def group_thresholds(self) -> GroupThresholds | None:
+        return GroupThresholds.from_dict(self.metadata.group_thresholds) if self.metadata.group_thresholds else None
 
 
 def hash_dataframe(df: pd.DataFrame) -> str:
@@ -125,6 +131,7 @@ class ModelRegistry:
         tuning_history: pd.DataFrame | None = None,
         tracking: dict[str, str] | None = None,
         conformal: ConformalInterval | None = None,
+        group_thresholds: GroupThresholds | None = None,
         version: str | None = None,
     ) -> Path:
         version = version or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
@@ -154,6 +161,7 @@ class ModelRegistry:
             environment=_environment(),
             tracking=tracking or {},
             conformal=conformal.to_dict() if conformal else {},
+            group_thresholds=group_thresholds.to_dict() if group_thresholds else {},
         )
         joblib.dump(pipeline, d / "pipeline.joblib", compress=3)
         (d / "metadata.json").write_text(meta.to_json(), encoding="utf-8")
@@ -272,6 +280,37 @@ def render_model_card(task: Task, meta: ModelMetadata, leaderboard: pd.DataFrame
             for m, g in gaps.items():
                 lines.append(f"| {attr} | {m} | {g:.3f} |")
         lines += [""]
+    mit = meta.fairness.get("mitigated")
+    if mit:
+        attr = mit["attribute"]
+        b, a = mit["overall_before"], mit["overall_after"]
+        lines += [
+            f"## Fairness mitigation: recall equalised across {attr}",
+            "",
+            f"Per-group decision thresholds are chosen on out-of-fold probabilities so that every {attr} group "
+            f"reaches the target recall. The model is unchanged; only the cut-off moves. The API returns both "
+            "the global-threshold flag and the mitigated flag.",
+            "",
+            "| Group | Global threshold | Per-group threshold | Recall before | Recall after | Selection rate before | Selection rate after |",
+            "|---|---|---|---|---|---|---|",
+        ]
+        before = {g["group"]: g for g in meta.fairness.get("groups", []) if g["attribute"] == attr}
+        after = {g["group"]: g for g in mit["groups"]}
+        for g, t in mit["thresholds"].items():
+            if g in before and g in after:
+                lines.append(
+                    f"| {g} | {meta.threshold:.3f} | {t:.3f} | {before[g]['tpr']:.3f} | {after[g]['tpr']:.3f} "
+                    f"| {before[g]['selection_rate']:.3f} | {after[g]['selection_rate']:.3f} |"
+                )
+        gap_b = meta.fairness.get("summary", {}).get(attr, {}).get("tpr_gap")
+        gap_a = mit["summary"].get(attr, {}).get("tpr_gap")
+        lines += [
+            "",
+            f"Hold-out recall gap across {attr}: **{gap_b:.3f} before, {gap_a:.3f} after**. "
+            f"Overall recall {b['recall']:.3f} -> {a['recall']:.3f}, precision {b['precision']:.3f} -> {a['precision']:.3f}, "
+            f"flagged {b['flagged_rate']:.1%} -> {a['flagged_rate']:.1%}.",
+            "",
+        ]
     lines += [
         "## Limitations",
         "",

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { api, fmt, titleCase, type FairnessGroup, type TaskName } from "@/lib/api";
+import { api, fmt, titleCase, type FairnessGroup, type Mitigated, type TaskName } from "@/lib/api";
 import { GroupedBars } from "@/components/charts/bar-charts";
 import { OfflineNotice } from "@/components/offline-notice";
 import { TaskPicker } from "@/components/task-picker";
@@ -44,6 +44,8 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
         </p>
         <TaskPicker tasks={TASKS} current={task} />
       </section>
+
+      {fair.mitigated && <MitigationCard m={fair.mitigated} before={fair.groups} threshold={info.threshold} />}
 
       {attributes.map((attr) => {
         const groups = fair.groups.filter((g) => g.attribute === attr);
@@ -101,6 +103,78 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
         );
       })}
     </div>
+  );
+}
+
+function MitigationCard({ m, before, threshold }: { m: Mitigated; before: FairnessGroup[]; threshold: number | null }) {
+  const b = new Map(before.filter((g) => g.attribute === m.attribute).map((g) => [g.group, g]));
+  const rows = m.groups.map((g) => ({ group: g.group, before: b.get(g.group), after: g, threshold: m.thresholds[g.group] }));
+  const gapBefore = Object.fromEntries(before.filter((g) => g.attribute === m.attribute).map((g) => [g.group, g.tpr ?? 0]));
+  const tprGapBefore = Math.max(...Object.values(gapBefore)) - Math.min(...Object.values(gapBefore));
+  const tprGapAfter = m.summary[m.attribute]?.tpr_gap ?? 0;
+  const chart = rows.flatMap((r) => [
+    { group: `${r.group} (global)`, recall: r.before?.tpr ?? 0, "selection rate": r.before?.selection_rate ?? 0 },
+    { group: `${r.group} (per-group)`, recall: r.after.tpr ?? 0, "selection rate": r.after.selection_rate ?? 0 },
+  ]);
+  return (
+    <Card className="glass border-primary/40">
+      <CardHeader>
+        <CardTitle>Mitigation: recall equalised across {titleCase(m.attribute)}</CardTitle>
+        <CardDescription className="flex flex-wrap gap-2">
+          <Badge variant="outline">recall gap before: {fmt(tprGapBefore, 3)}</Badge>
+          <Badge variant="outline">recall gap after: {fmt(tprGapAfter, 3)}</Badge>
+          <Badge variant="outline">
+            overall recall {fmt(m.overall_before.recall, 2)} to {fmt(m.overall_after.recall, 2)}
+          </Badge>
+          <Badge variant="outline">
+            precision {fmt(m.overall_before.precision, 2)} to {fmt(m.overall_after.precision, 2)}
+          </Badge>
+          <Badge variant="outline">
+            flagged {fmt(m.overall_before.flagged_rate * 100, 1)}% to {fmt(m.overall_after.flagged_rate * 100, 1)}%
+          </Badge>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+        <div className="xl:col-span-3">
+          <GroupedBars data={chart} metrics={[{ key: "recall", label: "recall (TPR)" }, { key: "selection rate", label: "selection rate" }]} format="fixed2" />
+        </div>
+        <div className="flex flex-col gap-3 xl:col-span-2">
+          <p className="text-sm text-muted-foreground">
+            One global threshold over-flags one group and under-serves the other. Choosing the cut-off per group on
+            out-of-fold probabilities gives every group the same target recall. The model is unchanged; the API
+            returns both flags so the choice stays visible.
+          </p>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Group</TableHead>
+                  <TableHead className="text-right">threshold</TableHead>
+                  <TableHead className="text-right">recall</TableHead>
+                  <TableHead className="text-right">selection</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((r) => (
+                  <TableRow key={r.group}>
+                    <TableCell>{r.group}</TableCell>
+                    <TableCell className="text-right font-mono text-xs">
+                      {fmt(threshold ?? 0, 2)} → {fmt(r.threshold, 2)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-xs">
+                      {fmt(r.before?.tpr ?? 0, 2)} → {fmt(r.after.tpr ?? 0, 2)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-xs">
+                      {fmt(r.before?.selection_rate ?? 0, 2)} → {fmt(r.after.selection_rate ?? 0, 2)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

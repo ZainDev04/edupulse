@@ -81,6 +81,7 @@ class PredictionService:
             "primary_metric": m.task.primary_metric,
             "mlflow_run_id": md.tracking.get("run_id"),
             "conformal": md.conformal or None,
+            "group_thresholds": md.group_thresholds or None,
         }
 
     def leaderboard(self, task_name: str) -> list[dict[str, Any]]:
@@ -92,7 +93,7 @@ class PredictionService:
     def fairness(self, task_name: str) -> dict[str, Any]:
         """Subgroup metrics and gap summary recorded at training time."""
         f = self.model(task_name).metadata.fairness
-        return {"groups": f.get("groups", []), "summary": f.get("summary", {})}
+        return {"groups": f.get("groups", []), "summary": f.get("summary", {}), "mitigated": f.get("mitigated")}
 
     def importance(self, task_name: str) -> dict[str, Any]:
         """Global SHAP and permutation importance recorded at training time."""
@@ -154,15 +155,18 @@ class PredictionService:
 
         if m.task.kind == "binary":
             proba = m.pipeline.predict_proba(X)[:, 1]
-            for p in proba:
-                out.append(
-                    {
-                        "probability": float(p),
-                        "at_risk": bool(p >= m.threshold),
-                        "threshold": float(m.threshold),
-                        "risk_band": risk_band(float(p)),
-                    }
-                )
+            gt = m.group_thresholds
+            group_thr = gt.thresholds_for(X[gt.attribute]) if gt and gt.attribute in X.columns else [None] * len(X)
+            for p, t in zip(proba, group_thr, strict=True):
+                rec: dict[str, Any] = {
+                    "probability": float(p),
+                    "at_risk": bool(p >= m.threshold),
+                    "threshold": float(m.threshold),
+                    "risk_band": risk_band(float(p)),
+                }
+                if t is not None:
+                    rec["mitigated"] = {"attribute": gt.attribute, "threshold": float(t), "at_risk": bool(p >= t)}
+                out.append(rec)
         elif m.task.kind == "multiclass":
             proba = m.pipeline.predict_proba(X)
             for row in proba:

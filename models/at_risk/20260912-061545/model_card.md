@@ -1,11 +1,11 @@
-# Model card: `at_risk` (v20260912-054350)
+# Model card: `at_risk` (v20260912-061545)
 
 **Task type:** binary  
 **Description:** Early-warning system: flag students likely to average below 60 using ONLY background information available before any exam is taken.  
 **Selected model:** `logistic_regression` (LogisticRegression)  
-**Created:** 2026-09-12T05:44:25+00:00  
+**Created:** 2026-09-12T06:16:20+00:00  
 **Training data hash:** `1d32fe149100deae` Â· 800 train / 200 test rows  
-**MLflow run:** `2f0b2779ac214d47b92a5cb74beb5a87` (experiment 1)  
+**MLflow run:** `2a34d67927874084ba9b6c1675e76edb` (experiment 1)  
 
 ## Intended use
 
@@ -100,6 +100,17 @@ Decision threshold: **0.414** (highest threshold that keeps out-of-fold recall â
 | race_ethnicity | precision_gap | 0.278 |
 | race_ethnicity | disparate_impact_ratio | 0.355 |
 
+## Fairness mitigation: recall equalised across lunch
+
+Per-group decision thresholds are chosen on out-of-fold probabilities so that every lunch group reaches the target recall. The model is unchanged; only the cut-off moves. The API returns both the global-threshold flag and the mitigated flag.
+
+| Group | Global threshold | Per-group threshold | Recall before | Recall after | Selection rate before | Selection rate after |
+|---|---|---|---|---|---|---|
+| free/reduced | 0.414 | 0.568 | 0.964 | 0.893 | 0.949 | 0.734 |
+| standard | 0.414 | 0.339 | 0.517 | 0.862 | 0.380 | 0.562 |
+
+Hold-out recall gap across lunch: **0.447 before, 0.031 after**. Overall recall 0.737 -> 0.877, precision 0.347 -> 0.397, flagged 60.5% -> 63.0%.
+
 ## Limitations
 
 - Trained on 1,000 anonymised records from one cohort. Results may not transfer to other institutions.
@@ -111,5 +122,5 @@ Decision threshold: **0.414** (highest threshold that keeps out-of-fold recall â
 - python: 3.14.6
 - sklearn: 1.9.1
 - pandas: 3.0.5
-- edupulse: 1.0.0
+- edupulse: 1.2.0
 - platform: Windows-10-10.0.19045-SP0

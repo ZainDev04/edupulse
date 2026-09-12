@@ -146,13 +146,31 @@ def _run_tracked(
         else {}
     )
     fairness = (
-        audit_task(task, result.pipeline, X_test, y_test, settings.figures_dir, threshold=result.threshold)
+        audit_task(
+            task,
+            result.pipeline,
+            X_test,
+            y_test,
+            settings.figures_dir,
+            threshold=result.threshold,
+            group_thresholds=result.group_thresholds,
+        )
         if audit
         else {}
     )
     figures.update(explainability.get("figures", {}))
     if fairness.get("figure"):
         figures["fairness"] = fairness["figure"]
+    if fairness.get("mitigated", {}).get("figure"):
+        figures["fairness_mitigation"] = fairness["mitigated"]["figure"]
+        tracker.log_metrics(
+            {
+                f"fairness_mitigated.{attr}.{m}": g
+                for attr, gaps in fairness["mitigated"]["summary"].items()
+                for m, g in gaps.items()
+            }
+        )
+        tracker.log_metrics({f"mitigated_{k}": v for k, v in fairness["mitigated"]["overall_after"].items()})
     if fairness.get("summary"):
         tracker.log_metrics(
             {f"fairness.{attr}.{m}": g for attr, gaps in fairness["summary"].items() for m, g in gaps.items()}
@@ -178,6 +196,7 @@ def _run_tracked(
         tuning_history=result.tuning_history,
         tracking=tracker.info,
         conformal=result.conformal,
+        group_thresholds=result.group_thresholds,
         version=version,
     )
     tracker.log_artefact_dir(artefact_dir)

@@ -6,9 +6,11 @@ Workflow
    stratified cross-validation on the training split.
 2. **Tuning** - the best family (excluding baselines) is tuned with Optuna
    (TPE sampler + median pruning) on the same CV protocol.
-3. **Threshold optimisation** (binary tasks) - the decision threshold is chosen
-   on out-of-fold probabilities to maximise F-beta, because in an early-warning
-   setting missing an at-risk student is costlier than a false alarm.
+3. **Threshold optimisation** (binary tasks) - the decision threshold is the
+   highest one that still reaches the target recall on out-of-fold
+   probabilities, because in an early-warning setting missing an at-risk
+   student is costlier than a false alarm. A second, per-group set of
+   thresholds equalises recall across the configured sensitive attribute.
 4. **Conformal calibration** (regression tasks) - out-of-fold residuals on the
    training split give a prediction interval with guaranteed marginal coverage.
 5. **Final fit** on the full training split.
@@ -41,6 +43,7 @@ from edupulse.config import Settings, get_settings
 from edupulse.features.engineering import DomainRules, FeatureEngineer, build_preprocessor
 from edupulse.logging_utils import get_logger
 from edupulse.models.conformal import ConformalInterval, calibrate
+from edupulse.models.mitigation import GroupThresholds, fit_group_thresholds
 from edupulse.models.zoo import Candidate, get_candidates
 from edupulse.tasks import Task
 
@@ -61,6 +64,7 @@ class TrainingResult:
     feature_names: list[str] = field(default_factory=list)
     train_seconds: float = 0.0
     conformal: ConformalInterval | None = None
+    group_thresholds: GroupThresholds | None = None
 
 
 # --------------------------------------------------------------------------- #
@@ -286,6 +290,7 @@ def train_task(
     pipeline = make_pipeline(task, best.build(**params), rules)
 
     threshold = None
+    group_thresholds = None
     if task.kind == "binary":
         cv = make_cv(task, Settings(cv_folds=settings.cv_folds, cv_repeats=1, random_state=settings.random_state))
         oof = cross_val_predict(clone(pipeline), X, y, cv=cv, method="predict_proba", n_jobs=settings.n_jobs)[:, 1]
@@ -297,6 +302,11 @@ def train_task(
             stats["precision"],
             100 * stats["flagged_rate"],
         )
+        attr = settings.fairness_attribute
+        if attr and attr in X.columns:
+            group_thresholds = fit_group_thresholds(
+                np.asarray(y), oof, X[attr], attribute=attr, target_recall=settings.target_recall, default=threshold
+            )
 
     conformal = None
     if task.kind == "regression":
@@ -325,4 +335,5 @@ def train_task(
         feature_names=feature_names,
         train_seconds=time.perf_counter() - t0,
         conformal=conformal,
+        group_thresholds=group_thresholds,
     )

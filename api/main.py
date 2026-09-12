@@ -70,11 +70,18 @@ class Contribution(BaseModel):
     contribution: float
 
 
+class MitigatedFlag(BaseModel):
+    attribute: str = Field(description="Sensitive attribute whose groups have equalised recall")
+    threshold: float = Field(description="Decision threshold for this student's group")
+    at_risk: bool
+
+
 class AtRiskPrediction(BaseModel):
     probability: float
     at_risk: bool
     threshold: float
     risk_band: str
+    mitigated: MitigatedFlag | None = Field(None, description="Flag under per-group thresholds with equalised recall")
     model_version: str
     explanation: list[Contribution] | None = None
 

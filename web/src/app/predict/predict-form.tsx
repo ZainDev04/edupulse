@@ -253,6 +253,16 @@ function AtRiskResult({ data, threshold }: { data: AtRiskPrediction; threshold: 
           </dd>
           <dt className="text-muted-foreground">Risk band</dt>
           <dd className={cn("font-medium capitalize", BAND_CLASS[data.risk_band])}>{data.risk_band}</dd>
+          {data.mitigated && (
+            <>
+              <dt className="text-muted-foreground">
+                Flag with {data.mitigated.attribute}-equalised threshold ({fmt(data.mitigated.threshold, 2)})
+              </dt>
+              <dd>
+                <Badge variant={data.mitigated.at_risk ? "destructive" : "secondary"}>{data.mitigated.at_risk ? "yes" : "no"}</Badge>
+              </dd>
+            </>
+          )}
           <dt className="text-muted-foreground">Model version</dt>
           <dd className="font-mono text-xs">{data.model_version}</dd>
           <dd className="col-span-2 mt-2 rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">

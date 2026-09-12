@@ -70,9 +70,26 @@ export interface FairnessGroup {
   accuracy?: number;
 }
 
+export interface OverallFlagMetrics {
+  recall: number;
+  precision: number;
+  flagged_rate: number;
+  fpr: number;
+}
+
+export interface Mitigated {
+  attribute: string;
+  thresholds: Record<string, number>;
+  groups: FairnessGroup[];
+  summary: Record<string, Record<string, number>>;
+  overall_before: OverallFlagMetrics;
+  overall_after: OverallFlagMetrics;
+}
+
 export interface Fairness {
   groups: FairnessGroup[];
   summary: Record<string, Record<string, number>>;
+  mitigated?: Mitigated | null;
 }
 
 export interface Importance {
@@ -108,6 +125,7 @@ export interface AtRiskPrediction {
   at_risk: boolean;
   threshold: number;
   risk_band: "low" | "moderate" | "high" | "critical";
+  mitigated?: { attribute: string; threshold: number; at_risk: boolean } | null;
   model_version: string;
   explanation?: Contribution[] | null;
 }

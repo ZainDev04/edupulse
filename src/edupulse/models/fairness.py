@@ -24,6 +24,7 @@ import pandas as pd  # noqa: E402
 from sklearn.metrics import mean_absolute_error, precision_score, recall_score, roc_auc_score  # noqa: E402
 from sklearn.pipeline import Pipeline  # noqa: E402
 
+from edupulse.models.mitigation import GroupThresholds, overall_metrics  # noqa: E402
 from edupulse.tasks import Task  # noqa: E402
 
 SENSITIVE_ATTRIBUTES = ["gender", "race_ethnicity", "lunch", "parental_level_of_education"]
@@ -45,16 +46,24 @@ def subgroup_metrics(
     threshold: float | None = None,
     attributes: list[str] | None = None,
     min_group_size: int = 10,
+    group_thresholds: GroupThresholds | None = None,
 ) -> pd.DataFrame:
-    """Return one row per (attribute, group) with size-aware metrics."""
+    """Return one row per (attribute, group) with size-aware metrics.
+
+    For binary tasks ``group_thresholds`` replaces the single ``threshold`` with the
+    per-group cut-offs, which is how the mitigated audit is produced.
+    """
     attributes = [a for a in (attributes or SENSITIVE_ATTRIBUTES) if a in X_test.columns]
     y = np.asarray(y_test)
     rows: list[dict[str, Any]] = []
 
     if task.kind == "binary":
         proba = pipeline.predict_proba(X_test)[:, 1]
-        thr = 0.5 if threshold is None else threshold
-        pred = (proba >= thr).astype(int)
+        if group_thresholds is not None and group_thresholds.attribute in X_test.columns:
+            pred = group_thresholds.predict(proba, X_test[group_thresholds.attribute])
+        else:
+            thr = 0.5 if threshold is None else threshold
+            pred = (proba >= thr).astype(int)
     elif task.kind == "regression":
         pred = pipeline.predict(X_test)
         proba = None
@@ -124,6 +133,30 @@ def plot_subgroups(groups: pd.DataFrame, task: Task, path: Path, title: str) -> 
     return path
 
 
+def plot_before_after(before: pd.DataFrame, after: pd.DataFrame, attribute: str, path: Path, title: str) -> Path | None:
+    """Recall and selection rate per group of ``attribute``, global threshold next to per-group thresholds."""
+    b = before[before["attribute"] == attribute].set_index("group")
+    a = after[after["attribute"] == attribute].set_index("group")
+    if b.empty or a.empty:
+        return None
+    groups = list(b.index)
+    x = np.arange(len(groups))
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    for ax, metric, label in zip(axes, ("tpr", "selection_rate"), ("Recall (TPR)", "Selection rate"), strict=True):
+        ax.bar(x - 0.2, b.loc[groups, metric], width=0.4, color="#94A3B8", label="global threshold")
+        ax.bar(x + 0.2, a.loc[groups, metric], width=0.4, color="#4F46E5", label="per-group thresholds")
+        ax.set_xticks(x, groups)
+        ax.set_ylim(0, 1.08)
+        ax.set_title(label)
+        ax.legend(fontsize=10, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=2, frameon=False)
+    fig.suptitle(title)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(path, dpi=160, bbox_inches="tight")
+    plt.close(fig)
+    return path
+
+
 def audit_task(
     task: Task,
     pipeline: Pipeline,
@@ -132,13 +165,38 @@ def audit_task(
     figures_dir: Path,
     *,
     threshold: float | None = None,
+    group_thresholds: GroupThresholds | None = None,
 ) -> dict[str, Any]:
+    """Subgroup audit under the global threshold, plus a before/after comparison when
+    per-group thresholds are supplied."""
     groups = subgroup_metrics(task, pipeline, X_test, y_test, threshold=threshold)
     fig = plot_subgroups(
         groups, task, figures_dir / task.name / "fairness_subgroups.png", f"{task.name}: subgroup performance"
     )
-    return {
+    out: dict[str, Any] = {
         "groups": groups.to_dict(orient="records"),
         "summary": fairness_summary(groups, task),
         "figure": str(fig) if fig else None,
     }
+    if task.kind == "binary" and group_thresholds is not None and group_thresholds.attribute in X_test.columns:
+        after = subgroup_metrics(task, pipeline, X_test, y_test, group_thresholds=group_thresholds)
+        y = np.asarray(y_test)
+        proba = pipeline.predict_proba(X_test)[:, 1]
+        thr = 0.5 if threshold is None else threshold
+        fig2 = plot_before_after(
+            groups,
+            after,
+            group_thresholds.attribute,
+            figures_dir / task.name / "fairness_mitigation.png",
+            f"{task.name}: recall equalised across {group_thresholds.attribute}",
+        )
+        out["mitigated"] = {
+            "attribute": group_thresholds.attribute,
+            "thresholds": group_thresholds.thresholds,
+            "groups": after.to_dict(orient="records"),
+            "summary": fairness_summary(after, task),
+            "overall_before": overall_metrics(y, (proba >= thr).astype(int)),
+            "overall_after": overall_metrics(y, group_thresholds.predict(proba, X_test[group_thresholds.attribute])),
+            "figure": str(fig2) if fig2 else None,
+        }
+    return out

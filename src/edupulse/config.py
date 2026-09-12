@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     medium_cutoff: int = 60
     high_cutoff: int = 80
     conformal_alpha: float = Field(0.10, gt=0.0, lt=1.0)  # 1 - alpha = nominal interval coverage
+    fairness_attribute: str | None = "lunch"  # attribute whose groups get equalised recall (None disables)
 
     # --- Experiment tracking (MLflow) -----------------------------------
     tracking: bool = True

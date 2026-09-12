@@ -15,7 +15,7 @@ Student performance intelligence platform: early-warning risk scoring, cross-sub
 
 ## What it does
 
-EduPulse takes the well-known Students Performance dataset (1,000 students, five background attributes, three exam scores) and builds a complete machine learning system around it. A single training command benchmarks ten model families with repeated cross-validation, tunes the winner with Optuna, picks a decision threshold from a recall target, calibrates conformal prediction intervals for the regression task, explains predictions with SHAP, audits subgroup fairness, writes a model card, registers the artefacts and records the run in MLflow. A FastAPI service, a Next.js web app and a Streamlit dashboard serve the registered models. Everything is covered by 53 tests and a GitHub Actions workflow.
+EduPulse takes the well-known Students Performance dataset (1,000 students, five background attributes, three exam scores) and builds a complete machine learning system around it. A single training command benchmarks ten model families with repeated cross-validation, tunes the winner with Optuna, picks a decision threshold from a recall target, calibrates conformal prediction intervals for the regression task, explains predictions with SHAP, audits subgroup fairness and equalises recall across lunch groups with per-group thresholds, writes a model card, registers the artefacts and records the run in MLflow. A FastAPI service, a Next.js web app and a Streamlit dashboard serve the registered models. Everything is covered by 57 tests and a GitHub Actions workflow.
 
 The project answers three questions:
 
@@ -75,6 +75,8 @@ With only five categorical inputs (about 17 one-hot columns) there is little non
 
 Math-score predictions come with a conformal interval: the 90% quantile of absolute out-of-fold residuals on the 800 training students gives a half-width of 9.2 points, and on the 200 hold-out students the band contains the true score 88.5% of the time, which is within sampling noise of the target. The guarantee is marginal (over students on average), not per student.
 
+The fairness audit shows the cost of a single threshold: it flags 95% of free/reduced-lunch students and catches only 52% of at-risk students on standard lunch. Per-group thresholds chosen on out-of-fold probabilities (0.57 for free/reduced, 0.34 for standard) bring recall to 0.89 and 0.86, cutting the recall gap from 0.447 to 0.031. Overall recall rises from 0.74 to 0.88 and precision from 0.35 to 0.40 while the flagged share moves from 60.5% to 63.0%. The API returns both flags so the choice of threshold stays visible.
+
 What drives the at-risk score, by mean absolute SHAP value: lunch (0.63), test preparation course (0.44), race/ethnicity (0.30), parental education (0.28), gender (0.27). Lunch type is a proxy for household income. Students who completed the test preparation course are at risk 17% of the time against 35% for those who did not.
 
 <table>
@@ -83,7 +85,7 @@ What drives the at-risk score, by mean absolute SHAP value: lunch (0.63), test p
 <td><img src="reports/figures/at_risk/shap_beeswarm.png" alt="SHAP beeswarm"/></td>
 </tr>
 <tr>
-<td><img src="reports/figures/at_risk/threshold_sweep.png" alt="threshold sweep"/></td>
+<td><img src="reports/figures/at_risk/fairness_mitigation.png" alt="recall before and after per-group thresholds"/></td>
 <td><img src="reports/figures/math_score/prediction_intervals.png" alt="conformal prediction intervals"/></td>
 </tr>
 </table>
@@ -103,7 +105,7 @@ flowchart LR
     FE --> TASK{Task registry}
     TASK --> LB[10-model CV leaderboard]
     LB --> OPT[Optuna tuning]
-    OPT --> THR[recall-targeted threshold<br/>or conformal calibration]
+    OPT --> THR[recall-targeted threshold<br/>per-group thresholds<br/>or conformal calibration]
     THR --> EVAL[hold-out evaluation]
     EVAL --> XAI[SHAP + permutation importance]
     EVAL --> FAIR[fairness audit]
@@ -242,13 +244,13 @@ app/dashboard.py            Streamlit dashboard
 src/edupulse/               the library (see docs/architecture.md)
   data/                     loader, schema
   features/                 engineering, preprocessing
-  models/                   zoo, train, evaluate, conformal, explain, fairness, registry, tracking (MLflow)
+  models/                   zoo, train, evaluate, conformal, explain, fairness, mitigation, registry, tracking (MLflow)
   tasks.py                  task registry
   pipeline.py               end-to-end run
   serving.py                prediction service shared by CLI, API and dashboard
   eda.py, cli.py, config.py
 notebooks/                  01_eda, 02_modelling, 03_explainability_fairness (generated and executed)
-tests/                      53 pytest tests (unit, end-to-end, tracking, conformal, API)
+tests/                      57 pytest tests (unit, end-to-end, tracking, conformal, mitigation, API)
 scripts/build_notebooks.py  notebooks as code
 models/                     versioned artefacts and model cards (generated)
 mlruns/                     MLflow store: SQLite database and run artefacts (generated, ignored)
@@ -269,7 +271,7 @@ CI runs lint, then the test suite on Ubuntu and Windows with Python 3.11 and 3.1
 
 ## Configuration
 
-Every setting can be overridden with environment variables or a `.env` file (see [`.env.example`](.env.example)): `EDUPULSE_N_TRIALS`, `EDUPULSE_CV_FOLDS`, `EDUPULSE_TARGET_RECALL`, `EDUPULSE_AT_RISK_THRESHOLD`, `EDUPULSE_TEST_SIZE`, `EDUPULSE_CONFORMAL_ALPHA`, `EDUPULSE_TRACKING_URI` and others.
+Every setting can be overridden with environment variables or a `.env` file (see [`.env.example`](.env.example)): `EDUPULSE_N_TRIALS`, `EDUPULSE_CV_FOLDS`, `EDUPULSE_TARGET_RECALL`, `EDUPULSE_AT_RISK_THRESHOLD`, `EDUPULSE_TEST_SIZE`, `EDUPULSE_CONFORMAL_ALPHA`, `EDUPULSE_FAIRNESS_ATTRIBUTE`, `EDUPULSE_TRACKING_URI` and others.
 
 ## Dataset
 
@@ -277,13 +279,13 @@ Every setting can be overridden with environment variables or a `.env` file (see
 
 ## Responsible use
 
-The at-risk score is a triage signal for prioritising support. It is never a judgement about a student. Sensitive attributes are used as inputs, and their effect is measured and published in every model card. Subgroup recall gaps are reported rather than hidden. Group-specific thresholds and reweighing are the obvious next steps for mitigation.
+The at-risk score is a triage signal for prioritising support. It is never a judgement about a student. Sensitive attributes are used as inputs, and their effect is measured and published in every model card. Subgroup recall gaps are reported rather than hidden, and per-group thresholds that equalise recall across lunch groups are shipped next to the global threshold, with the before and after numbers in the model card. Equal recall is one fairness criterion among several; selection rates still differ because base rates differ.
 
 ## Roadmap
 
 - ~~MLflow experiment tracking behind the registry~~ (1.1.0)
 - ~~Conformal prediction intervals for `math_score`~~ (1.2.0)
-- Fairness mitigation (threshold equalisation or reweighing) with a before and after audit
+- ~~Fairness mitigation (threshold equalisation) with a before and after audit~~ (1.3.0)
 - Drift monitoring on the inference stream
 
 ## Author
