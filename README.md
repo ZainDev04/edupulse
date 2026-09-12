@@ -207,8 +207,12 @@ API_URL=http://localhost:8000 npm run dev      # http://localhost:3000, with `ed
 
 <table>
 <tr>
-<td><img src="docs/screenshots/web-predict.jpg" alt="Web app, predict page"/></td>
+<td><img src="docs/screenshots/web-predict.jpg" alt="Web app, predict page with both flags"/></td>
 <td><img src="docs/screenshots/web-leaderboard.jpg" alt="Web app, leaderboard page"/></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/web-fairness.jpg" alt="Web app, fairness page with the mitigation table"/></td>
+<td><img src="docs/screenshots/web-monitoring.jpg" alt="Web app, drift monitoring page"/></td>
 </tr>
 </table>
 
