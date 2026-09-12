@@ -25,6 +25,7 @@ const NAV = [
   { href: "/leaderboard", label: "Leaderboard", icon: BarChart3 },
   { href: "/explain", label: "Explainability", icon: Sparkles },
   { href: "/fairness", label: "Fairness", icon: Scale },
+  { href: "/monitoring", label: "Monitoring", icon: Activity },
 ] as const;
 
 export function AppShell({ health, children }: { health: Health | null; children: React.ReactNode }) {

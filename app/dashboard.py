@@ -410,6 +410,68 @@ def page_fairness():
     )
 
 
+def page_monitoring():
+    st.title("Drift monitoring")
+    tasks = trained_tasks()
+    if not tasks:
+        st.warning("No trained models found.")
+        return
+    task = st.selectbox("Task", tasks)
+    st.markdown(
+        "Upload a CSV of new students (same columns as the training data) to compare with the training "
+        "population: population stability index per input and a Kolmogorov-Smirnov test on the model output. "
+        "PSI below 0.10 is stable, 0.10 to 0.25 is worth a look, above 0.25 is a material shift."
+    )
+    upload = st.file_uploader("New cohort CSV", type="csv")
+    if upload is None:
+        st.info(
+            "Waiting for a CSV. The REST API also reports drift on its live prediction stream at /monitoring/drift/{task}."
+        )
+        return
+    from edupulse.data.loader import load_clean
+
+    current = load_clean(upload)
+    report = service().drift(task, current)
+    if report["status"] == "insufficient":
+        st.warning(f"Need at least {report['min_rows']} rows; got {report['n_current']}.")
+        return
+    colour = {"ok": "green", "warn": "orange", "alert": "red"}[report["status"]]
+    st.markdown(
+        f"### Overall: :{colour}[{report['status'].upper()}]  "
+        f"({report['n_current']} rows against {report['n_reference']} training rows)"
+    )
+    rows = [{"feature": f["feature"], "psi": f["psi"], "status": f["status"]} for f in report["features"]]
+    if report["scores"]:
+        rows.append({"feature": "model output", "psi": report["scores"]["psi"], "status": report["scores"]["status"]})
+    frame = pd.DataFrame(rows)
+    fig = px.bar(
+        frame,
+        x="psi",
+        y="feature",
+        orientation="h",
+        color="status",
+        color_discrete_map={"ok": "#4F46E5", "warn": "#F59E0B", "alert": "#EF4444"},
+    )
+    fig.add_vline(x=0.25, line_dash="dash", line_color="#94A3B8")
+    st.plotly_chart(fig, width="stretch")
+    if report["scores"]:
+        s = report["scores"]
+        st.caption(
+            f"Model output: KS statistic {s['ks_statistic']:.3f} (p = {s['ks_pvalue']:.3g}), "
+            f"mean {s['reference_mean']:.3f} in training against {s['current_mean']:.3f} now."
+        )
+    shifts = [
+        {"feature": f["feature"], **{k: v for k, v in f["top_shifts"][0].items()}}
+        for f in report["features"]
+        if f["top_shifts"]
+    ]
+    st.markdown("#### Largest moving bin per feature")
+    st.dataframe(
+        pd.DataFrame(shifts).set_index("feature").style.format({"reference": "{:.1%}", "current": "{:.1%}"}),
+        width="stretch",
+    )
+
+
 def page_model_card():
     st.title("Model cards")
     tasks = trained_tasks()
@@ -427,6 +489,7 @@ PAGES = {
     "Predict": page_predict,
     "Explainability": page_explain,
     "Fairness": page_fairness,
+    "Monitoring": page_monitoring,
     "Model cards": page_model_card,
 }
 

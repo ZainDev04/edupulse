@@ -12,6 +12,7 @@ Examples
     edupulse dashboard
     edupulse runs --task at_risk
     edupulse ui
+    edupulse drift --task at_risk --path new_intake.csv
 """
 
 from __future__ import annotations
@@ -224,6 +225,37 @@ def predict(
     payload = {k: v for k, v in payload.items() if v is not None}
     result = svc.predict(task, [payload], explain=explain)[0]
     typer.echo(json.dumps(result, indent=2))
+
+
+@app.command()
+def drift(
+    task: Annotated[str, typer.Option(help="Task name.")],
+    path: Annotated[Path, typer.Option(help="CSV of new student rows to compare with the training data.")],
+):
+    """Report feature and score drift of a CSV against the training population."""
+    import pandas as pd
+
+    from edupulse.data.loader import load_clean
+    from edupulse.serving import PredictionService
+
+    current = load_clean(path)
+    report = PredictionService().drift(task, current)
+    typer.echo(
+        f"{report['task']} v{report['model_version']}: {report['n_current']} rows vs {report['n_reference']} training rows"
+    )
+    if report["status"] == "insufficient":
+        typer.secho(f"Need at least {report['min_rows']} rows.", fg="yellow")
+        raise typer.Exit(1)
+    rows = [{"feature": f["feature"], "psi": f["psi"], "status": f["status"]} for f in report["features"]]
+    if report["scores"]:
+        s = report["scores"]
+        rows.append({"feature": "(model output)", "psi": s["psi"], "status": s["status"]})
+    typer.echo(pd.DataFrame(rows).to_string(index=False, float_format=lambda v: f"{v:.3f}"))
+    if report["scores"]:
+        s = report["scores"]
+        typer.echo(f"KS on output: statistic {s['ks_statistic']:.3f}, p={s['ks_pvalue']:.3g}")
+    colour = {"ok": "green", "warn": "yellow", "alert": "red"}[report["status"]]
+    typer.secho(f"Overall: {report['status'].upper()}", fg=colour)
 
 
 @app.command()

@@ -2,6 +2,13 @@
 
 Notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.0] - 2026-09-12
+
+### Added
+- Drift monitoring (`edupulse.monitoring`): PSI per input feature and a KS test plus PSI on the model output, against the training population. `PredictionService` keeps a bounded log of scored rows (5,000 per task); `GET /monitoring/drift/{task}` reports on that window, `POST` on a supplied cohort, `DELETE /monitoring/log/{task}` empties it.
+- `edupulse drift --task NAME --path FILE.csv` runs the same check from the terminal; a Monitoring page in the web app and a Monitoring page in the Streamlit dashboard (CSV upload).
+- 6 new tests (63 total).
+
 ## [1.3.0] - 2026-09-12
 
 ### Added

@@ -29,6 +29,7 @@ flowchart LR
     FAIR --> REG
     REG -.-> MLF[(models.tracking<br/>MLflow runs in mlruns/)]
     REG --> SVC[serving.PredictionService]
+    SVC --> MON[monitoring<br/>PSI, KS on the prediction log]
     SVC --> API[FastAPI<br/>/predict/*]
     API --> WEB[Next.js web app]
     SVC --> UI[Streamlit dashboard]
@@ -43,6 +44,7 @@ src/edupulse/
   tasks.py             task registry: at_risk, math_score, performance_level
   pipeline.py          run_pipeline(), the single end-to-end entry point
   serving.py           PredictionService shared by CLI, API and dashboard
+  monitoring.py        PSI per feature, KS on the output, bounded prediction log
   eda.py               automated EDA profile and figures
   cli.py               the `edupulse` command-line interface (Typer)
   data/
@@ -99,12 +101,14 @@ Because pre-processing is inside the pipeline, the API accepts raw, human-readab
 
 FastAPI wraps it with typed request models (`Literal` enums for every categorical field), CORS, a timing header, a batch endpoint capped at 1,000 rows, and 422/503 error mapping.
 
+Every prediction is appended to a bounded in-memory log (5,000 rows per task). `GET /monitoring/drift/{task}` compares that window with the training population: PSI per input feature (category shares for nominal columns, ten reference-quantile bins for numeric ones) and a two-sample KS test plus PSI on the model output (at-risk probability, predicted score, or top class probability). `POST` on the same path scores a supplied cohort instead. The log is process-local by design; a shared store would be the first change for a multi-replica deployment.
+
 The Next.js app under `web/` consumes the REST API. Its pages are server components that fetch from `API_URL` at request time; the Predict form runs in the browser and calls a `/api/*` route that proxies to the backend. Theme tokens come from `design-system/edupulse/MASTER.md`.
 
-The Streamlit dashboard uses the same service in-process (no HTTP hop) for EDA, leaderboards, live prediction, explanations, fairness and model cards.
+The Streamlit dashboard uses the same service in-process (no HTTP hop) for EDA, leaderboards, live prediction, explanations, fairness, drift checks on an uploaded CSV, and model cards.
 
 ## 8. Quality gates
 
-- `pytest`: 57 tests covering schema, features, tasks, the zoo, thresholding, per-group thresholds, conformal intervals, explainers, fairness, registry round-trip, MLflow tracking, the end-to-end pipeline and the REST API (through `TestClient`).
+- `pytest`: 63 tests covering schema, features, tasks, the zoo, thresholding, per-group thresholds, conformal intervals, drift statistics, explainers, fairness, registry round-trip, MLflow tracking, the end-to-end pipeline and the REST API (through `TestClient`).
 - `ruff`: lint and format.
 - GitHub Actions: lint, then the test matrix (Ubuntu and Windows, Python 3.11 and 3.12), then a fast training run with an API curl smoke test, a lint, type-check and build of the web app, then a Docker build.

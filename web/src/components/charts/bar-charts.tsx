@@ -40,6 +40,7 @@ export function RankedBars({
   errorKey,
   labelKey = "name",
   colorKey,
+  colorMap,
   format: fmtKey = "fixed3",
   domain,
   height,
@@ -50,6 +51,8 @@ export function RankedBars({
   errorKey?: string;
   labelKey?: string;
   colorKey?: string;
+  /** Explicit colour per colorKey value; falls back to the palette order. */
+  colorMap?: Record<string, string>;
   format?: Fmt;
   domain?: [number, number];
   height?: number;
@@ -86,7 +89,11 @@ export function RankedBars({
           {data.map((d, i) => (
             <Cell
               key={i}
-              fill={colorKey ? PALETTE[categories.indexOf(String(d[colorKey])) % PALETTE.length] : PALETTE[0]}
+              fill={
+                colorKey
+                  ? (colorMap?.[String(d[colorKey])] ?? PALETTE[categories.indexOf(String(d[colorKey])) % PALETTE.length])
+                  : PALETTE[0]
+              }
             />
           ))}
           {errorKey && <ErrorBar dataKey={errorKey} width={4} strokeWidth={1.5} stroke="var(--muted-foreground)" direction="x" />}

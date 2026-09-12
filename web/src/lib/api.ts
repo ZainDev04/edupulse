@@ -146,6 +146,35 @@ export interface LevelPrediction {
   explanation?: Contribution[] | null;
 }
 
+export interface DriftFeature {
+  feature: string;
+  kind: "numeric" | "categorical";
+  psi: number;
+  status: "ok" | "warn" | "alert";
+  top_shifts: { bin: string; reference: number; current: number }[];
+}
+
+export interface DriftReport {
+  task: TaskName;
+  source: "prediction_log" | "provided";
+  model_version: string;
+  status: "ok" | "warn" | "alert" | "insufficient";
+  n_reference: number;
+  n_current: number;
+  min_rows: number;
+  features: DriftFeature[];
+  scores: {
+    psi: number;
+    status: "ok" | "warn" | "alert";
+    ks_statistic: number;
+    ks_pvalue: number;
+    reference_mean: number;
+    current_mean: number;
+  } | null;
+  thresholds?: { warn: number; alert: number };
+  computed_at: string;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -179,6 +208,7 @@ export const api = {
   leaderboard: (task: TaskName) =>
     tryGet<{ task: TaskName; rows: LeaderboardRow[] }>(`/models/${TASK_SLUG[task]}/leaderboard`),
   fairness: (task: TaskName) => tryGet<Fairness>(`/models/${TASK_SLUG[task]}/fairness`),
+  drift: (task: TaskName) => tryGet<DriftReport>(`/monitoring/drift/${TASK_SLUG[task]}`),
   importance: (task: TaskName) => tryGet<Importance>(`/models/${TASK_SLUG[task]}/importance`),
   stats: () => tryGet<DatasetStats>("/stats"),
 };

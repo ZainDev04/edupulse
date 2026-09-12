@@ -18,6 +18,7 @@ from edupulse.data.schema import SCORE_COLUMNS, validate_dataframe
 from edupulse.logging_utils import get_logger
 from edupulse.models.explain import Explainer
 from edupulse.models.registry import LoadedModel, ModelRegistry
+from edupulse.monitoring import PredictionLog, drift_report
 from edupulse.pipeline import load_engineered
 from edupulse.tasks import TASKS, get_task
 
@@ -41,6 +42,8 @@ class PredictionService:
         self.registry = ModelRegistry(models_dir)
         self._models: dict[str, LoadedModel] = {}
         self._explainers: dict[str, Explainer] = {}
+        self._reference_scores: dict[str, np.ndarray] = {}
+        self.log = PredictionLog()
 
     # ------------------------------------------------------------------ #
     def available_tasks(self) -> list[str]:
@@ -193,7 +196,57 @@ class PredictionService:
                 rec["explanation"] = ex.local_explanation(X.iloc[[i]], top_k=top_k)
         for rec in out:
             rec["model_version"] = m.metadata.version
+        self.log.append(m.task.name, X.to_dict(orient="records"), [self._score_of(m, r) for r in out])
         return out
+
+    # ------------------------------------------------------------------ #
+    # Drift monitoring
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _score_of(m: LoadedModel, rec: dict[str, Any]) -> float:
+        """The one number per prediction whose distribution is monitored."""
+        if m.task.kind == "binary":
+            return rec["probability"]
+        if m.task.kind == "regression":
+            return rec["prediction"]
+        return max(rec["probabilities"].values())
+
+    def _scores_on(self, m: LoadedModel, X: pd.DataFrame) -> np.ndarray:
+        if m.task.kind == "binary":
+            return m.pipeline.predict_proba(X)[:, 1]
+        if m.task.kind == "regression":
+            return np.clip(m.pipeline.predict(X), 0, 100)
+        return m.pipeline.predict_proba(X).max(axis=1)
+
+    def reference_scores(self, task_name: str) -> np.ndarray:
+        """Model outputs on the training population, cached per task."""
+        m = self.model(task_name)
+        if m.task.name not in self._reference_scores:
+            self._reference_scores[m.task.name] = self._scores_on(m, _full_frame()[m.task.features])
+        return self._reference_scores[m.task.name]
+
+    def drift(self, task_name: str, current: pd.DataFrame | None = None) -> dict[str, Any]:
+        """Compare ``current`` rows (default: the prediction log) with the training population."""
+        m = self.model(task_name)
+        reference = _full_frame()
+        if current is None:
+            logged = self.log.frame(m.task.name)
+            X = logged.drop(columns=["_score", "_ts"], errors="ignore")
+            scores = logged["_score"].to_numpy() if "_score" in logged else np.array([])
+            source = "prediction_log"
+        else:
+            X = self._frame(m.task.name, current.to_dict(orient="records"))
+            scores = self._scores_on(m, X)
+            source = "provided"
+        report = drift_report(
+            reference[m.task.features],
+            X,
+            list(m.task.features),
+            reference_scores=self.reference_scores(m.task.name),
+            current_scores=scores,
+        )
+        report.update(task=m.task.name, source=source, model_version=m.metadata.version)
+        return report
 
 
 @lru_cache(maxsize=1)

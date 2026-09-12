@@ -13,6 +13,7 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, Literal
 
+import pandas as pd
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -203,6 +204,31 @@ def model_importance(task: str, request: Request):
     if task.replace("-", "_") not in TASKS:
         raise HTTPException(404, f"Unknown task '{task}'")
     return _svc(request).importance(task)
+
+
+@app.get("/monitoring/drift/{task}", tags=["monitoring"])
+def monitoring_drift(task: str, request: Request):
+    """Drift of the recent prediction stream against the training population (PSI per feature, KS on scores)."""
+    if task.replace("-", "_") not in TASKS:
+        raise HTTPException(404, f"Unknown task '{task}'")
+    return _svc(request).drift(task)
+
+
+@app.post("/monitoring/drift/{task}", tags=["monitoring"])
+def monitoring_drift_batch(task: str, body: BatchRequest, request: Request):
+    """Drift of a supplied batch of rows (for example last week's intake) against the training population."""
+    if task.replace("-", "_") not in TASKS:
+        raise HTTPException(404, f"Unknown task '{task}'")
+    rows = [r.model_dump(exclude_none=True) for r in body.students]
+    return _svc(request).drift(task, pd.DataFrame(rows))
+
+
+@app.delete("/monitoring/log/{task}", tags=["monitoring"], status_code=204)
+def monitoring_reset(task: str, request: Request):
+    """Empty the prediction log for a task."""
+    if task.replace("-", "_") not in TASKS:
+        raise HTTPException(404, f"Unknown task '{task}'")
+    _svc(request).log.clear(task.replace("-", "_"))
 
 
 @app.get("/stats", tags=["meta"])

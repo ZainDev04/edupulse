@@ -15,7 +15,7 @@ Student performance intelligence platform: early-warning risk scoring, cross-sub
 
 ## What it does
 
-EduPulse takes the well-known Students Performance dataset (1,000 students, five background attributes, three exam scores) and builds a complete machine learning system around it. A single training command benchmarks ten model families with repeated cross-validation, tunes the winner with Optuna, picks a decision threshold from a recall target, calibrates conformal prediction intervals for the regression task, explains predictions with SHAP, audits subgroup fairness and equalises recall across lunch groups with per-group thresholds, writes a model card, registers the artefacts and records the run in MLflow. A FastAPI service, a Next.js web app and a Streamlit dashboard serve the registered models. Everything is covered by 57 tests and a GitHub Actions workflow.
+EduPulse takes the well-known Students Performance dataset (1,000 students, five background attributes, three exam scores) and builds a complete machine learning system around it. A single training command benchmarks ten model families with repeated cross-validation, tunes the winner with Optuna, picks a decision threshold from a recall target, calibrates conformal prediction intervals for the regression task, explains predictions with SHAP, audits subgroup fairness and equalises recall across lunch groups with per-group thresholds, writes a model card, registers the artefacts and records the run in MLflow. In production the API watches its own prediction stream for drift. A FastAPI service, a Next.js web app and a Streamlit dashboard serve the registered models. Everything is covered by 63 tests and a GitHub Actions workflow.
 
 The project answers three questions:
 
@@ -168,9 +168,10 @@ curl -X POST "http://localhost:8000/predict/at-risk?explain=true" \
 {
   "probability": 0.885,
   "at_risk": true,
-  "threshold": 0.416,
+  "threshold": 0.414,
   "risk_band": "critical",
-  "model_version": "20260911-223257",
+  "mitigated": {"attribute": "lunch", "threshold": 0.568, "at_risk": true},
+  "model_version": "20260912-061545",
   "explanation": [
     {"feature": "lunch", "value": "free/reduced", "contribution": 0.835},
     {"feature": "race_ethnicity", "value": "group A", "contribution": 0.447},
@@ -185,16 +186,18 @@ curl -X POST "http://localhost:8000/predict/at-risk?explain=true" \
 | GET | `/models`, `/models/{task}` | metadata, metrics, threshold, features |
 | GET | `/models/{task}/leaderboard`, `/fairness`, `/importance` | CV leaderboard, subgroup audit, SHAP and permutation importance |
 | GET | `/stats` | dataset headline figures and at-risk rate by group |
-| POST | `/predict/at-risk` | early-warning probability, risk band, optional SHAP |
-| POST | `/predict/math-score` | expected math score |
+| POST | `/predict/at-risk` | early-warning probability, risk band, both flags, optional SHAP |
+| POST | `/predict/math-score` | expected math score with a 90% conformal interval |
 | POST | `/predict/performance-level` | low, medium or high with class probabilities |
 | POST | `/predict/{task}/batch` | up to 1,000 students per call |
+| GET, POST | `/monitoring/drift/{task}` | PSI per input and KS on the output for the live prediction window (GET) or a supplied cohort (POST) |
+| DELETE | `/monitoring/log/{task}` | empty the prediction window |
 
 Requests are validated with Pydantic `Literal` enums, so an unknown category returns 422. Every response has an `X-Process-Time-ms` header. A missing model returns 503 with a hint on how to train it.
 
 ## Web app
 
-A Next.js 16 frontend under [`web/`](web/) built with Tailwind 4, shadcn/ui and Recharts on top of the REST API. Five pages: Overview (KPIs, registered models, risk by group), Predict (form, probability gauge with the decision threshold marked, SHAP contributions), Leaderboard, Explainability and Fairness. Server components read from the API directly; the Predict form goes through a `/api/*` proxy route.
+A Next.js 16 frontend under [`web/`](web/) built with Tailwind 4, shadcn/ui and Recharts on top of the REST API. Six pages: Overview (KPIs, registered models, risk by group), Predict (form, probability gauge with the decision threshold marked, both flags, the conformal interval, SHAP contributions), Leaderboard, Explainability, Fairness (audit and the before/after mitigation table) and Monitoring (drift of the live prediction window). Server components read from the API directly; the Predict form goes through a `/api/*` proxy route.
 
 ```bash
 cd web && npm install
@@ -235,6 +238,28 @@ edupulse ui                                 # MLflow UI on http://localhost:5000
 
 The store is a SQLite file at `mlruns/mlflow.db` with artefacts under `mlruns/artifacts`. Set `EDUPULSE_TRACKING_URI` to a server URL to share runs, `EDUPULSE_TRACKING=false` (or `--no-track`) to switch tracking off. If `mlflow` is not installed the pipeline logs a warning and carries on.
 
+## Drift monitoring
+
+The API keeps the last 5,000 scored students per task in memory and compares them with the training population on request: population stability index per input (category shares for nominal columns, reference-quantile bins for numeric ones) and a two-sample Kolmogorov-Smirnov test plus PSI on the model output. PSI below 0.10 reads as stable, 0.10 to 0.25 as worth a look, above 0.25 as a material shift. The same check runs on any CSV:
+
+```bash
+edupulse drift --task at_risk --path new_intake.csv
+```
+
+```
+                    feature   psi status
+                     gender 0.019     ok
+             race_ethnicity 0.030     ok
+parental_level_of_education 0.014     ok
+                      lunch 9.296  alert
+    test_preparation_course 0.000     ok
+             (model output) 1.750  alert
+KS on output: statistic 0.389, p=3.1e-18
+Overall: ALERT
+```
+
+That run compared 150 students who were all on free/reduced lunch. The web app's Monitoring page and the Streamlit dashboard show the same report.
+
 ## Project structure
 
 ```
@@ -248,9 +273,10 @@ src/edupulse/               the library (see docs/architecture.md)
   tasks.py                  task registry
   pipeline.py               end-to-end run
   serving.py                prediction service shared by CLI, API and dashboard
+  monitoring.py             PSI and KS drift checks, bounded prediction log
   eda.py, cli.py, config.py
 notebooks/                  01_eda, 02_modelling, 03_explainability_fairness (generated and executed)
-tests/                      57 pytest tests (unit, end-to-end, tracking, conformal, mitigation, API)
+tests/                      63 pytest tests (unit, end-to-end, tracking, conformal, mitigation, monitoring, API)
 scripts/build_notebooks.py  notebooks as code
 models/                     versioned artefacts and model cards (generated)
 mlruns/                     MLflow store: SQLite database and run artefacts (generated, ignored)
@@ -283,10 +309,7 @@ The at-risk score is a triage signal for prioritising support. It is never a jud
 
 ## Roadmap
 
-- ~~MLflow experiment tracking behind the registry~~ (1.1.0)
-- ~~Conformal prediction intervals for `math_score`~~ (1.2.0)
-- ~~Fairness mitigation (threshold equalisation) with a before and after audit~~ (1.3.0)
-- Drift monitoring on the inference stream
+All four planned extensions have shipped: MLflow experiment tracking (1.1.0), conformal prediction intervals for `math_score` (1.2.0), fairness mitigation with a before and after audit (1.3.0) and drift monitoring on the inference stream (1.4.0). Ideas that were considered and left out: reweighing as a second mitigation strategy, a persistent store for the prediction log, and scheduled retraining when drift trips the alert level.
 
 ## Author
 
