@@ -35,7 +35,7 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
       <section className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Fairness audit</h1>
+        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Fairness audit</h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
           Hold-out performance sliced by sensitive attribute. For an early-warning tool the gap that matters most is
           recall: are at-risk students caught at the same rate in every group? Some difference in selection rate is

@@ -29,7 +29,7 @@ export default async function OverviewPage() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
       <section className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Student performance intelligence</h1>
+        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Student performance intelligence</h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
           Three registered models trained on {stats.n_students.toLocaleString()} students. The at-risk model
           flags students likely to average below 60 from background information alone, before any exam is taken.
@@ -94,9 +94,11 @@ export default async function OverviewPage() {
                         {m.cv_metric} {fmt(m.cv_score)}
                       </TableCell>
                       <TableCell className="font-mono text-xs">{headline(m.kind, m.test_metrics)}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
+                      <TableCell
+                        className="whitespace-nowrap font-mono text-xs text-muted-foreground"
+                        title={m.mlflow_run_id ? `MLflow run ${m.mlflow_run_id}` : undefined}
+                      >
                         {m.version}
-                        {m.mlflow_run_id && <div title={m.mlflow_run_id}>run {m.mlflow_run_id.slice(0, 8)}</div>}
                       </TableCell>
                     </TableRow>
                   );

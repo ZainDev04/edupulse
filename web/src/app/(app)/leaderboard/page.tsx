@@ -40,7 +40,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
       <section className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Model leaderboard</h1>
+        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Model leaderboard</h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
           Every candidate scored with repeated stratified cross-validation on the 800 training students. The best
           non-baseline family is then tuned with Optuna and fitted once on the full training split.

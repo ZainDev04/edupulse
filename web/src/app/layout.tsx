@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
-import { Fira_Code, Fira_Sans } from "next/font/google";
+import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { AppShell } from "@/components/app-shell";
-import { api } from "@/lib/api";
 
-const firaSans = Fira_Sans({
-  variable: "--font-fira-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const firaCode = Fira_Code({
-  variable: "--font-fira-code",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 });
@@ -22,18 +27,15 @@ export const metadata: Metadata = {
     template: "%s | EduPulse",
   },
   description:
-    "Student performance intelligence: early-warning risk scoring, score prediction, SHAP explanations and a fairness audit.",
+    "Student performance intelligence: early-warning risk scoring, score prediction with conformal intervals, SHAP explanations, a fairness audit with mitigation, and drift monitoring.",
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const health = await api.health();
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${firaSans.variable} ${firaCode.variable} h-full antialiased`}>
-      <body className="min-h-full">
-        <AppShell health={health}>{children}</AppShell>
-      </body>
+    <html lang="en" className={`dark ${inter.variable} ${playfair.variable} ${jetbrains.variable} h-full antialiased`}>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }

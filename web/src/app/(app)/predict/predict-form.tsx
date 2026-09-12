@@ -346,7 +346,7 @@ function Explanation({ rows, kind }: { rows: Contribution[]; kind: TaskName }) {
       <CardHeader>
         <CardTitle>Why</CardTitle>
         <CardDescription>
-          SHAP contributions summed to the original features, in {unit}. Red pushes the prediction up, green pushes it down.
+          SHAP contributions summed to the original features, in {unit}. Red pushes the prediction up, violet pushes it down.
         </CardDescription>
       </CardHeader>
       <CardContent>

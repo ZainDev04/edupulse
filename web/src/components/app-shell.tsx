@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
-  { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/overview", label: "Overview", icon: LayoutDashboard },
   { href: "/predict", label: "Predict", icon: Target },
   { href: "/leaderboard", label: "Leaderboard", icon: BarChart3 },
   { href: "/explain", label: "Explainability", icon: Sparkles },
@@ -37,7 +37,7 @@ export function AppShell({ health, children }: { health: Health | null; children
   const nav = (
     <nav aria-label="Primary" className="flex flex-col gap-1">
       {NAV.map(({ href, label, icon: Icon }) => {
-        const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const active = pathname.startsWith(href);
         return (
           <Link
             key={href}
@@ -71,7 +71,7 @@ export function AppShell({ health, children }: { health: Health | null; children
   return (
     <div className="flex min-h-screen">
       <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-4 py-5 lg:flex">
-        <Link href="/" className="mb-6 flex items-center gap-2 px-2 text-base font-semibold">
+        <Link href="/" className="mb-6 flex items-center gap-2 px-2 font-display text-lg font-semibold">
           <Activity className="size-5 text-primary" aria-hidden="true" />
           EduPulse
         </Link>
@@ -102,10 +102,10 @@ export function AppShell({ health, children }: { health: Health | null; children
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </Button>
-          <span className="flex items-center gap-2 font-semibold">
+          <Link href="/" className="flex items-center gap-2 font-display text-lg font-semibold">
             <Activity className="size-5 text-primary" aria-hidden="true" />
             EduPulse
-          </span>
+          </Link>
           <div className="ml-auto">{status}</div>
         </header>
         {open && (

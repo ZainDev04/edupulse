@@ -23,7 +23,7 @@ export default async function ExplainPage({ searchParams }: { searchParams: Prom
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
       <section className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Explainability</h1>
+        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Explainability</h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
           Two independent views of what the model relies on. SHAP values are computed on the encoded features and
           summed back to the original columns, so one-hot categories appear as a single bar. Permutation importance

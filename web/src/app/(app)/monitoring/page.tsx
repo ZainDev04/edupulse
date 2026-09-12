@@ -28,7 +28,7 @@ export default async function MonitoringPage({ searchParams }: { searchParams: P
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
       <section className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Drift monitoring</h1>
+        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Drift monitoring</h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
           The API keeps the last few thousand scored students in memory and compares them with the training
           population. Population stability index (PSI) per input flags a shift in who is being scored; a
