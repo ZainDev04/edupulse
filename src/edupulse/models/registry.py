@@ -30,6 +30,7 @@ from sklearn.pipeline import Pipeline
 from edupulse import __version__
 from edupulse.config import get_settings
 from edupulse.logging_utils import get_logger
+from edupulse.models.conformal import ConformalInterval
 from edupulse.tasks import Task, get_task
 
 log = get_logger(__name__)
@@ -58,6 +59,7 @@ class ModelMetadata:
     figures: dict[str, str] = field(default_factory=dict)
     environment: dict[str, str] = field(default_factory=dict)
     tracking: dict[str, str] = field(default_factory=dict)
+    conformal: dict[str, Any] = field(default_factory=dict)
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), indent=2, default=str)
@@ -73,6 +75,10 @@ class LoadedModel:
     @property
     def threshold(self) -> float:
         return self.metadata.threshold if self.metadata.threshold is not None else 0.5
+
+    @property
+    def interval(self) -> ConformalInterval | None:
+        return ConformalInterval.from_dict(self.metadata.conformal) if self.metadata.conformal else None
 
 
 def hash_dataframe(df: pd.DataFrame) -> str:
@@ -118,6 +124,7 @@ class ModelRegistry:
         figures: dict[str, str] | None = None,
         tuning_history: pd.DataFrame | None = None,
         tracking: dict[str, str] | None = None,
+        conformal: ConformalInterval | None = None,
         version: str | None = None,
     ) -> Path:
         version = version or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
@@ -146,6 +153,7 @@ class ModelRegistry:
             figures=figures or {},
             environment=_environment(),
             tracking=tracking or {},
+            conformal=conformal.to_dict() if conformal else {},
         )
         joblib.dump(pipeline, d / "pipeline.joblib", compress=3)
         (d / "metadata.json").write_text(meta.to_json(), encoding="utf-8")
@@ -228,6 +236,22 @@ def render_model_card(task: Task, meta: ModelMetadata, leaderboard: pd.DataFrame
             f"Decision threshold: **{meta.threshold:.3f}** (highest threshold that keeps out-of-fold recall ≥ target recall).",
             "",
         ]
+    if meta.conformal:
+        c = meta.conformal
+        cov = meta.test_metrics.get("interval_coverage")
+        width = meta.test_metrics.get("interval_width")
+        lines += [
+            "## Prediction intervals (conformal)",
+            "",
+            f"Every prediction comes with a symmetric interval of half-width **{c['quantile']:.2f}** points, "
+            f"calibrated for **{100 * (1 - c['alpha']):.0f}%** coverage on {c['n_calibration']} out-of-fold "
+            f"residuals from the training split ({c['method']}).",
+        ]
+        if cov is not None:
+            lines.append(
+                f"Empirical hold-out coverage: **{cov:.1%}** (mean width {width:.1f} points after clipping to 0-100)."
+            )
+        lines.append("")
     lines += ["## Model leaderboard (repeated stratified CV)", "", board_md, ""]
     if meta.best_params:
         lines += [

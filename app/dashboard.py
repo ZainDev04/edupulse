@@ -271,6 +271,11 @@ def page_predict():
         c2.info("This is a triage signal for prioritising support. It is not a judgement about the student.")
     elif t.kind == "regression":
         st.metric("Predicted math score", f"{res['prediction']:.1f} / 100")
+        if res.get("lower") is not None:
+            st.caption(
+                f"{res['confidence']:.0%} conformal interval: {res['lower']:.1f} to {res['upper']:.1f} "
+                "(calibrated on out-of-fold residuals; coverage is a marginal guarantee, not per student)."
+            )
     else:
         st.metric("Predicted performance level", res["label"].upper())
         probs = pd.Series(res["probabilities"]).reindex(["low", "medium", "high"])

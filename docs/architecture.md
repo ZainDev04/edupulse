@@ -20,7 +20,7 @@ flowchart LR
     end
     VAL --> FE[features.engineering<br/>domain features and targets]
     FE --> TASK[tasks.Task<br/>features, target, metric]
-    TASK --> TRAIN[models.train<br/>leaderboard, Optuna, threshold]
+    TASK --> TRAIN[models.train<br/>leaderboard, Optuna, threshold, conformal]
     TRAIN --> EVAL[models.evaluate<br/>hold-out metrics and figures]
     TRAIN --> XAI[models.explain<br/>SHAP and permutation importance]
     TRAIN --> FAIR[models.fairness<br/>subgroup audit]
@@ -53,7 +53,8 @@ src/edupulse/
   models/
     zoo.py             candidate estimators and their Optuna search spaces
     train.py           CV leaderboard, tuning, threshold selection, final fit
-    evaluate.py        metrics and ROC, PR, calibration, threshold and regression plots
+    evaluate.py        metrics and ROC, PR, calibration, threshold, regression and interval plots
+    conformal.py       cross-conformal prediction intervals for regression tasks
     explain.py         SHAP (tree, linear and kernel explainers) with one-hot aggregation
     fairness.py        subgroup metrics, parity gaps, disparate-impact ratio
     registry.py        versioned artefact store and model-card renderer
@@ -78,21 +79,22 @@ Because pre-processing is inside the pipeline, the API accepts raw, human-readab
 2. Leaderboard. Every candidate is scored with `RepeatedStratifiedKFold(5 x 2)` (`RepeatedKFold` for regression) on the training split. Mean and standard deviation of the primary metric and all secondary metrics are recorded.
 3. Tuning. The best non-baseline family is tuned with Optuna (TPE sampler, median pruner, per-fold pruning reports). If tuning does not beat the defaults, the defaults are kept.
 4. Threshold (binary tasks only). Out-of-fold probabilities from a fresh 5-fold CV pick the highest threshold that still reaches the configured target recall (default 80%).
-5. Final fit on the full training split. Hold-out metrics, figures, SHAP values, permutation importance and the fairness audit are computed on the test split only.
-6. Register. Artefacts are written to `models/<task>/<version>/` and `latest.json` is updated.
-7. Track. The whole run is also logged to MLflow: settings and tuned parameters, one metric per zoo candidate, the Optuna objective per trial as a step series, hold-out metrics (`test_*`), fairness gaps, figures, the model card and the pipeline as an MLflow model. The run id goes into `metadata.json`, so a registry version and its MLflow run point at each other. The store is SQLite at `mlruns/mlflow.db` (`EDUPULSE_TRACKING_URI` can point at a server); the registry stays the source of truth for serving, MLflow is the history.
+5. Conformal calibration (regression tasks only). A fresh 5-fold CV on the training split gives out-of-fold residuals; the finite-sample-corrected `1 - alpha` quantile of their absolute values (alpha 0.10 by default) is the half-width of a symmetric interval around every prediction. Coverage is guaranteed on average for exchangeable students. The interval is clipped to 0-100 and its empirical hold-out coverage is reported in the model card so the guarantee can be checked.
+6. Final fit on the full training split. Hold-out metrics, figures, SHAP values, permutation importance and the fairness audit are computed on the test split only.
+7. Register. Artefacts are written to `models/<task>/<version>/` and `latest.json` is updated.
+8. Track. The whole run is also logged to MLflow: settings and tuned parameters, one metric per zoo candidate, the Optuna objective per trial as a step series, hold-out metrics (`test_*`), fairness gaps, figures, the model card and the pipeline as an MLflow model. The run id goes into `metadata.json`, so a registry version and its MLflow run point at each other. The store is SQLite at `mlruns/mlflow.db` (`EDUPULSE_TRACKING_URI` can point at a server); the registry stays the source of truth for serving, MLflow is the history.
 
 ## 6. Why three tasks
 
 | Task | Kind | Inputs | Purpose |
 |---|---|---|---|
 | `at_risk` | binary | background only | The realistic early-warning problem and the main task. A modest AUC is expected because the inputs are weak proxies. |
-| `math_score` | regression | background + reading + writing | Cross-subject prediction with strong signal (R² about 0.88). Exercises the regression path. |
+| `math_score` | regression | background + reading + writing | Cross-subject prediction with strong signal (R² about 0.88) and a conformal interval on every prediction. Exercises the regression path. |
 | `performance_level` | 3-class | background + all scores | The original coursework task, kept as a leakage case study: the label is a function of the inputs. |
 
 ## 7. Serving
 
-`PredictionService` loads the latest version of each task on first use, validates rows against the schema, and returns probabilities, risk bands (low, moderate, high, critical) and optional SHAP contributions.
+`PredictionService` loads the latest version of each task on first use, validates rows against the schema, and returns probabilities, risk bands (low, moderate, high, critical), prediction intervals for the regression task, and optional SHAP contributions.
 
 FastAPI wraps it with typed request models (`Literal` enums for every categorical field), CORS, a timing header, a batch endpoint capped at 1,000 rows, and 422/503 error mapping.
 
@@ -102,6 +104,6 @@ The Streamlit dashboard uses the same service in-process (no HTTP hop) for EDA, 
 
 ## 8. Quality gates
 
-- `pytest`: 48 tests covering schema, features, tasks, the zoo, thresholding, explainers, fairness, registry round-trip, MLflow tracking, the end-to-end pipeline and the REST API (through `TestClient`).
+- `pytest`: 53 tests covering schema, features, tasks, the zoo, thresholding, conformal intervals, explainers, fairness, registry round-trip, MLflow tracking, the end-to-end pipeline and the REST API (through `TestClient`).
 - `ruff`: lint and format.
 - GitHub Actions: lint, then the test matrix (Ubuntu and Windows, Python 3.11 and 3.12), then a fast training run with an API curl smoke test, a lint, type-check and build of the web app, then a Docker build.

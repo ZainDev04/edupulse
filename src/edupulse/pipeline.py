@@ -42,7 +42,10 @@ class PipelineOutput:
         if self.task.kind == "binary":
             return f"ROC-AUC {m['roc_auc']:.3f} · PR-AUC {m['average_precision']:.3f} · recall {m['recall']:.3f} @ thr {m['threshold']:.2f}"
         if self.task.kind == "regression":
-            return f"R² {m['r2']:.3f} · RMSE {m['rmse']:.2f} · MAE {m['mae']:.2f}"
+            head = f"R² {m['r2']:.3f} · RMSE {m['rmse']:.2f} · MAE {m['mae']:.2f}"
+            if "interval_coverage" in m:
+                head += f" · {m['interval_nominal']:.0%} interval covers {m['interval_coverage']:.1%}"
+            return head
         return f"accuracy {m['accuracy']:.3f} · macro-F1 {m['f1_macro']:.3f}"
 
 
@@ -116,7 +119,9 @@ def _run_tracked(
     result = train_task(task, X_train, y_train, settings=settings, rules=rules)
     tracker.log_training(result, task=task)
 
-    metrics = evaluate_task(task, result.pipeline, X_test, y_test, threshold=result.threshold)
+    metrics = evaluate_task(
+        task, result.pipeline, X_test, y_test, threshold=result.threshold, conformal=result.conformal
+    )
     tracker.log_metrics(metrics, prefix="test_")
     log.info(
         "Hold-out metrics for %s: %s", task.name, {k: round(v, 4) for k, v in metrics.items() if isinstance(v, float)}
@@ -131,6 +136,7 @@ def _run_tracked(
         settings.figures_dir,
         threshold=result.threshold,
         tuning_history=result.tuning_history,
+        conformal=result.conformal,
     )
     explainability = (
         explain_task(
@@ -171,6 +177,7 @@ def _run_tracked(
         figures=figures,
         tuning_history=result.tuning_history,
         tracking=tracker.info,
+        conformal=result.conformal,
         version=version,
     )
     tracker.log_artefact_dir(artefact_dir)

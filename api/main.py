@@ -81,6 +81,9 @@ class AtRiskPrediction(BaseModel):
 
 class ScorePrediction(BaseModel):
     prediction: float
+    lower: float | None = Field(None, description="Lower end of the conformal prediction interval")
+    upper: float | None = Field(None, description="Upper end of the conformal prediction interval")
+    confidence: float | None = Field(None, description="Nominal coverage of the interval, e.g. 0.9")
     model_version: str
     explanation: list[Contribution] | None = None
 

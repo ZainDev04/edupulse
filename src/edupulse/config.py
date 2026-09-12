@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     target_recall: float = Field(0.80, ge=0.1, le=1.0)
     medium_cutoff: int = 60
     high_cutoff: int = 80
+    conformal_alpha: float = Field(0.10, gt=0.0, lt=1.0)  # 1 - alpha = nominal interval coverage
 
     # --- Experiment tracking (MLflow) -----------------------------------
     tracking: bool = True

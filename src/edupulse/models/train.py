@@ -9,7 +9,9 @@ Workflow
 3. **Threshold optimisation** (binary tasks) - the decision threshold is chosen
    on out-of-fold probabilities to maximise F-beta, because in an early-warning
    setting missing an at-risk student is costlier than a false alarm.
-4. **Final fit** on the full training split.
+4. **Conformal calibration** (regression tasks) - out-of-fold residuals on the
+   training split give a prediction interval with guaranteed marginal coverage.
+5. **Final fit** on the full training split.
 
 Everything is wrapped in a single :class:`sklearn.pipeline.Pipeline`
 (``features -> preprocess -> model``) so persisted artefacts accept raw rows.
@@ -38,6 +40,7 @@ from sklearn.pipeline import Pipeline
 from edupulse.config import Settings, get_settings
 from edupulse.features.engineering import DomainRules, FeatureEngineer, build_preprocessor
 from edupulse.logging_utils import get_logger
+from edupulse.models.conformal import ConformalInterval, calibrate
 from edupulse.models.zoo import Candidate, get_candidates
 from edupulse.tasks import Task
 
@@ -57,6 +60,7 @@ class TrainingResult:
     tuning_history: pd.DataFrame | None = None
     feature_names: list[str] = field(default_factory=list)
     train_seconds: float = 0.0
+    conformal: ConformalInterval | None = None
 
 
 # --------------------------------------------------------------------------- #
@@ -294,6 +298,18 @@ def train_task(
             100 * stats["flagged_rate"],
         )
 
+    conformal = None
+    if task.kind == "regression":
+        conformal = calibrate(
+            pipeline,
+            X,
+            y,
+            alpha=settings.conformal_alpha,
+            n_splits=settings.cv_folds,
+            random_state=settings.random_state,
+            n_jobs=settings.n_jobs,
+        )
+
     pipeline.fit(X, y)
     feature_names = list(pipeline.named_steps["preprocess"].get_feature_names_out())
 
@@ -308,4 +324,5 @@ def train_task(
         tuning_history=history,
         feature_names=feature_names,
         train_seconds=time.perf_counter() - t0,
+        conformal=conformal,
     )

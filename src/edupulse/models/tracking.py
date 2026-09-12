@@ -160,6 +160,9 @@ class ExperimentTracker:
         self.log_metrics({f"cv_{task.primary_metric}": result.cv_score, "train_seconds": result.train_seconds})
         if result.threshold is not None:
             self.log_metrics({"threshold": result.threshold})
+        if result.conformal is not None:
+            self.log_params({"conformal_alpha": result.conformal.alpha})
+            self.log_metrics({"conformal_half_width": result.conformal.quantile})
 
         # one metric per zoo candidate so the leaderboard is comparable across runs in the UI
         board: pd.DataFrame = result.leaderboard

@@ -2,6 +2,13 @@
 
 Notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.0] - 2026-09-12
+
+### Added
+- Conformal prediction intervals for `math_score` (`edupulse.models.conformal`). Out-of-fold residuals on the training split give a finite-sample-corrected 90% half-width (9.2 points on the real data); hold-out coverage (88.5%) and mean width are reported in the metrics, the model card and a new `prediction_intervals.png` figure. `EDUPULSE_CONFORMAL_ALPHA` sets the level.
+- `/predict/math-score` returns `lower`, `upper` and `confidence`; the web predict form draws the interval, the Streamlit dashboard prints it, `/models/math_score` exposes the calibration record.
+- 5 new tests (53 total).
+
 ## [1.1.0] - 2026-09-12
 
 ### Added

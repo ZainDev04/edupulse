@@ -80,6 +80,7 @@ class PredictionService:
             "leakage_note": m.task.leakage_note,
             "primary_metric": m.task.primary_metric,
             "mlflow_run_id": md.tracking.get("run_id"),
+            "conformal": md.conformal or None,
         }
 
     def leaderboard(self, task_name: str) -> list[dict[str, Any]]:
@@ -173,9 +174,14 @@ class PredictionService:
                     }
                 )
         else:
-            pred = m.pipeline.predict(X)
-            for v in pred:
-                out.append({"prediction": float(np.clip(v, 0, 100))})
+            pred = np.clip(m.pipeline.predict(X), 0, 100)
+            interval = m.interval
+            lower, upper = interval.predict(pred) if interval else (pred, pred)
+            for v, lo, hi in zip(pred, lower, upper, strict=True):
+                rec: dict[str, Any] = {"prediction": float(v)}
+                if interval:
+                    rec.update(lower=float(lo), upper=float(hi), confidence=interval.confidence)
+                out.append(rec)
 
         if explain:
             ex = self.explainer(task_name)

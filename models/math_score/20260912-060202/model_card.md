@@ -1,11 +1,11 @@
-# Model card: `math_score` (v20260912-054434)
+# Model card: `math_score` (v20260912-060202)
 
 **Task type:** regression  
 **Description:** Cross-subject score prediction: estimate a student's math score from their background and literacy (reading/writing) scores.  
 **Selected model:** `ridge` (Ridge)  
-**Created:** 2026-09-12T05:44:57+00:00  
+**Created:** 2026-09-12T06:02:32+00:00  
 **Training data hash:** `1d32fe149100deae` · 800 train / 200 test rows  
-**MLflow run:** `51668821ffcb481aa06f6a101e67edb5` (experiment 1)  
+**MLflow run:** `e69dc155921a43adab83a5d5cb2138e9` (experiment 1)  
 
 ## Intended use
 
@@ -31,8 +31,16 @@ Estimate an expected math score from the reading and writing scores and backgrou
 | mae | 4.1790 |
 | mape | 9.4010 |
 | residual_std | 5.3548 |
+| interval_coverage | 0.8850 |
+| interval_nominal | 0.9000 |
+| interval_width | 18.4212 |
 
 Cross-validated r2 of the selected configuration: **0.8676**
+
+## Prediction intervals (conformal)
+
+Every prediction comes with a symmetric interval of half-width **9.24** points, calibrated for **90%** coverage on 800 out-of-fold residuals from the training split (cross-conformal, absolute out-of-fold residuals).
+Empirical hold-out coverage: **88.5%** (mean width 18.4 points after clipping to 0-100).
 
 ## Model leaderboard (repeated stratified CV)
 

@@ -15,7 +15,7 @@ Student performance intelligence platform: early-warning risk scoring, cross-sub
 
 ## What it does
 
-EduPulse takes the well-known Students Performance dataset (1,000 students, five background attributes, three exam scores) and builds a complete machine learning system around it. A single training command benchmarks ten model families with repeated cross-validation, tunes the winner with Optuna, picks a decision threshold from a recall target, explains predictions with SHAP, audits subgroup fairness, writes a model card, and registers the artefacts. A FastAPI service and a Streamlit dashboard serve the registered models. Everything is covered by 42 tests and a GitHub Actions workflow.
+EduPulse takes the well-known Students Performance dataset (1,000 students, five background attributes, three exam scores) and builds a complete machine learning system around it. A single training command benchmarks ten model families with repeated cross-validation, tunes the winner with Optuna, picks a decision threshold from a recall target, calibrates conformal prediction intervals for the regression task, explains predictions with SHAP, audits subgroup fairness, writes a model card, registers the artefacts and records the run in MLflow. A FastAPI service, a Next.js web app and a Streamlit dashboard serve the registered models. Everything is covered by 53 tests and a GitHub Actions workflow.
 
 The project answers three questions:
 
@@ -34,7 +34,7 @@ Hold-out split is 200 students (20%, stratified). Cross-validation is 5-fold wit
 | Task | Best model | CV score | Hold-out |
 |---|---|---|---|
 | At-risk early warning | Logistic regression (tuned C) | ROC-AUC 0.742 ± 0.034 | ROC-AUC 0.699, PR-AUC 0.519 (prevalence 0.285), recall 0.74 at threshold 0.42 |
-| Math-score prediction | Ridge (tuned alpha) | R² 0.867 ± 0.019 | R² 0.882, RMSE 5.36, MAE 4.18 |
+| Math-score prediction | Ridge (tuned alpha) | R² 0.867 ± 0.019 | R² 0.882, RMSE 5.36, MAE 4.18; 90% conformal interval (half-width 9.2) covers 88.5% |
 | Performance level | HistGradientBoosting (tuned) | macro-F1 0.971 | accuracy 0.985, macro-F1 0.985 |
 
 <details>
@@ -73,6 +73,8 @@ With only five categorical inputs (about 17 one-hot columns) there is little non
 | 10 | baseline_mean | -0.008 | 0.006 |
 </details>
 
+Math-score predictions come with a conformal interval: the 90% quantile of absolute out-of-fold residuals on the 800 training students gives a half-width of 9.2 points, and on the 200 hold-out students the band contains the true score 88.5% of the time, which is within sampling noise of the target. The guarantee is marginal (over students on average), not per student.
+
 What drives the at-risk score, by mean absolute SHAP value: lunch (0.63), test preparation course (0.44), race/ethnicity (0.30), parental education (0.28), gender (0.27). Lunch type is a proxy for household income. Students who completed the test preparation course are at risk 17% of the time against 35% for those who did not.
 
 <table>
@@ -82,7 +84,7 @@ What drives the at-risk score, by mean absolute SHAP value: lunch (0.63), test p
 </tr>
 <tr>
 <td><img src="reports/figures/at_risk/threshold_sweep.png" alt="threshold sweep"/></td>
-<td><img src="reports/figures/math_score/regression_diagnostics.png" alt="regression diagnostics"/></td>
+<td><img src="reports/figures/math_score/prediction_intervals.png" alt="conformal prediction intervals"/></td>
 </tr>
 </table>
 
@@ -101,7 +103,7 @@ flowchart LR
     FE --> TASK{Task registry}
     TASK --> LB[10-model CV leaderboard]
     LB --> OPT[Optuna tuning]
-    OPT --> THR[recall-targeted threshold]
+    OPT --> THR[recall-targeted threshold<br/>or conformal calibration]
     THR --> EVAL[hold-out evaluation]
     EVAL --> XAI[SHAP + permutation importance]
     EVAL --> FAIR[fairness audit]
@@ -240,13 +242,13 @@ app/dashboard.py            Streamlit dashboard
 src/edupulse/               the library (see docs/architecture.md)
   data/                     loader, schema
   features/                 engineering, preprocessing
-  models/                   zoo, train, evaluate, explain, fairness, registry, tracking (MLflow)
+  models/                   zoo, train, evaluate, conformal, explain, fairness, registry, tracking (MLflow)
   tasks.py                  task registry
   pipeline.py               end-to-end run
   serving.py                prediction service shared by CLI, API and dashboard
   eda.py, cli.py, config.py
 notebooks/                  01_eda, 02_modelling, 03_explainability_fairness (generated and executed)
-tests/                      48 pytest tests (unit, end-to-end, tracking, API)
+tests/                      53 pytest tests (unit, end-to-end, tracking, conformal, API)
 scripts/build_notebooks.py  notebooks as code
 models/                     versioned artefacts and model cards (generated)
 mlruns/                     MLflow store: SQLite database and run artefacts (generated, ignored)
@@ -267,7 +269,7 @@ CI runs lint, then the test suite on Ubuntu and Windows with Python 3.11 and 3.1
 
 ## Configuration
 
-Every setting can be overridden with environment variables or a `.env` file (see [`.env.example`](.env.example)): `EDUPULSE_N_TRIALS`, `EDUPULSE_CV_FOLDS`, `EDUPULSE_TARGET_RECALL`, `EDUPULSE_AT_RISK_THRESHOLD`, `EDUPULSE_TEST_SIZE`, `EDUPULSE_TRACKING_URI` and others.
+Every setting can be overridden with environment variables or a `.env` file (see [`.env.example`](.env.example)): `EDUPULSE_N_TRIALS`, `EDUPULSE_CV_FOLDS`, `EDUPULSE_TARGET_RECALL`, `EDUPULSE_AT_RISK_THRESHOLD`, `EDUPULSE_TEST_SIZE`, `EDUPULSE_CONFORMAL_ALPHA`, `EDUPULSE_TRACKING_URI` and others.
 
 ## Dataset
 
@@ -280,7 +282,7 @@ The at-risk score is a triage signal for prioritising support. It is never a jud
 ## Roadmap
 
 - ~~MLflow experiment tracking behind the registry~~ (1.1.0)
-- Conformal prediction intervals for `math_score`
+- ~~Conformal prediction intervals for `math_score`~~ (1.2.0)
 - Fairness mitigation (threshold equalisation or reweighing) with a before and after audit
 - Drift monitoring on the inference stream
 

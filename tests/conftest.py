@@ -102,5 +102,27 @@ def trained_at_risk(fast_settings):
 
 
 @pytest.fixture(scope="session")
+def trained_math_score(fast_settings):
+    """A trained + registered math_score model in its own registry (so API 503 tests keep a missing model)."""
+    from edupulse.models import train as train_mod
+    from edupulse.models import zoo
+
+    settings = fast_settings.model_copy(update={"models_dir": fast_settings.models_dir.parent / "models_math"})
+    cands = [c for c in zoo.get_candidates("regression", n_jobs=1) if c.name in ("baseline_mean", "ridge")]
+    original = train_mod.get_candidates
+    train_mod.get_candidates = lambda *a, **k: cands
+    try:
+        out = run_pipeline(
+            "math_score",
+            settings=settings,
+            registry=ModelRegistry(settings.models_dir),
+            data_path=settings.raw_data_path,
+        )
+    finally:
+        train_mod.get_candidates = original
+    return out, settings
+
+
+@pytest.fixture(scope="session")
 def has_real_data() -> bool:
     return RAW.exists()

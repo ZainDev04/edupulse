@@ -271,12 +271,34 @@ function ScoreResult({ data }: { data: ScorePrediction }) {
         <CardTitle>Expected math score</CardTitle>
         <CardDescription>Ridge regression on background plus reading and writing. Hold-out RMSE is about 5.4 points.</CardDescription>
       </CardHeader>
-      <CardContent className="flex items-baseline gap-3">
-        <span className="font-mono text-5xl font-semibold tabular-nums">{data.prediction.toFixed(1)}</span>
-        <span className="text-muted-foreground">/ 100</span>
-        <span className="ml-auto font-mono text-xs text-muted-foreground">v{data.model_version}</span>
+      <CardContent className="flex flex-col gap-3">
+        <div className="flex items-baseline gap-3">
+          <span className="font-mono text-5xl font-semibold tabular-nums">{data.prediction.toFixed(1)}</span>
+          <span className="text-muted-foreground">/ 100</span>
+          <span className="ml-auto font-mono text-xs text-muted-foreground">v{data.model_version}</span>
+        </div>
+        {data.lower != null && data.upper != null && data.confidence != null && (
+          <IntervalBar lower={data.lower} upper={data.upper} point={data.prediction} confidence={data.confidence} />
+        )}
       </CardContent>
     </Card>
+  );
+}
+
+function IntervalBar({ lower, upper, point, confidence }: { lower: number; upper: number; point: number; confidence: number }) {
+  const pct = (v: number) => `${Math.min(100, Math.max(0, v))}%`;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="relative h-2 w-full rounded-full bg-muted">
+        <div className="absolute h-2 rounded-full bg-primary/30" style={{ left: pct(lower), width: pct(upper - lower) }} />
+        <div className="absolute top-1/2 h-3.5 w-0.5 -translate-y-1/2 bg-primary" style={{ left: pct(point) }} />
+      </div>
+      <div className="flex justify-between font-mono text-xs text-muted-foreground">
+        <span>{lower.toFixed(1)}</span>
+        <span>{Math.round(confidence * 100)}% conformal interval</span>
+        <span>{upper.toFixed(1)}</span>
+      </div>
+    </div>
   );
 }
 

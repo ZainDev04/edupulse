@@ -38,6 +38,7 @@ export interface ModelInfo {
   created_at: string;
   leakage_note: string | null;
   mlflow_run_id: string | null;
+  conformal: { alpha: number; quantile: number; n_calibration: number; method: string } | null;
 }
 
 export interface Health {
@@ -113,6 +114,9 @@ export interface AtRiskPrediction {
 
 export interface ScorePrediction {
   prediction: number;
+  lower: number | null;
+  upper: number | null;
+  confidence: number | null;
   model_version: string;
   explanation?: Contribution[] | null;
 }

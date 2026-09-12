@@ -34,6 +34,7 @@ from sklearn.metrics import (  # noqa: E402
 )
 from sklearn.pipeline import Pipeline  # noqa: E402
 
+from edupulse.models.conformal import ConformalInterval, evaluate_coverage  # noqa: E402
 from edupulse.tasks import Task  # noqa: E402
 
 sns.set_theme(style="whitegrid", context="talk", palette="deep")
@@ -58,6 +59,7 @@ def evaluate_task(
     y_test: pd.Series,
     *,
     threshold: float | None = None,
+    conformal: ConformalInterval | None = None,
 ) -> dict[str, Any]:
     """Compute a task-appropriate metric dictionary on the hold-out set."""
     y_true = np.asarray(y_test)
@@ -73,6 +75,13 @@ def evaluate_task(
             mape=float(np.mean(np.abs((y_true - pred) / np.clip(y_true, 1, None))) * 100),
             residual_std=float(np.std(y_true - pred)),
         )
+        if conformal is not None:
+            cov = evaluate_coverage(conformal, y_true, pred)
+            out.update(
+                interval_coverage=cov["coverage"],
+                interval_nominal=cov["nominal_coverage"],
+                interval_width=cov["mean_width"],
+            )
         return out
 
     proba = pipeline.predict_proba(X_test)
@@ -209,6 +218,27 @@ def plot_regression_diagnostics(y_true, pred, path: Path, title: str) -> Path:
     return _save(fig, path)
 
 
+def plot_intervals(y_true, pred, interval: ConformalInterval, path: Path, title: str) -> Path:
+    """Hold-out students sorted by prediction, with the conformal band and the misses marked."""
+    y_true, pred = np.asarray(y_true, dtype=float), np.asarray(pred, dtype=float)
+    order = np.argsort(pred)
+    lower, upper = interval.predict(pred[order])
+    covered = (y_true[order] >= lower) & (y_true[order] <= upper)
+    x = np.arange(len(order))
+    fig, ax = plt.subplots(figsize=(12, 5.5))
+    ax.fill_between(x, lower, upper, color=PALETTE["primary"], alpha=0.18, label=f"{interval.confidence:.0%} interval")
+    ax.plot(x, pred[order], color=PALETTE["primary"], lw=1.5, label="prediction")
+    ax.scatter(x[covered], y_true[order][covered], s=16, color=PALETTE["good"], label="actual (covered)")
+    ax.scatter(x[~covered], y_true[order][~covered], s=22, color=PALETTE["bad"], label="actual (missed)")
+    ax.set(
+        xlabel="Hold-out students, sorted by predicted score",
+        ylabel="Math score",
+        title=f"{title} (coverage {covered.mean():.1%}, half-width {interval.quantile:.1f})",
+    )
+    ax.legend(loc="upper left", fontsize=10)
+    return _save(fig, path)
+
+
 def plot_tuning_history(history: pd.DataFrame, metric: str, path: Path, title: str) -> Path | None:
     if history is None or history.empty or "value" not in history:
         return None
@@ -234,6 +264,7 @@ def make_figures(
     *,
     threshold: float | None = None,
     tuning_history: pd.DataFrame | None = None,
+    conformal: ConformalInterval | None = None,
 ) -> dict[str, str]:
     """Generate every figure relevant to ``task`` and return ``{name: path}``."""
     d = figures_dir / task.name
@@ -252,6 +283,10 @@ def make_figures(
         figs["diagnostics"] = plot_regression_diagnostics(
             y_true, pred, d / "regression_diagnostics.png", f"{task.name}: hold-out diagnostics"
         )
+        if conformal is not None:
+            figs["intervals"] = plot_intervals(
+                y_true, pred, conformal, d / "prediction_intervals.png", f"{task.name}: conformal intervals"
+            )
     else:
         proba = pipeline.predict_proba(X_test)
         if task.kind == "binary":

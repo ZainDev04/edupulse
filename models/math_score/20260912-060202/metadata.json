@@ -1,7 +1,7 @@
 {
   "task": "math_score",
-  "version": "20260912-054434",
-  "created_at": "2026-09-12T05:44:57+00:00",
+  "version": "20260912-060202",
+  "created_at": "2026-09-12T06:02:32+00:00",
   "model_name": "ridge",
   "model_class": "Ridge",
   "best_params": {
@@ -15,7 +15,10 @@
     "rmse": 5.361580187617819,
     "mae": 4.1789948661732765,
     "mape": 9.400979884015348,
-    "residual_std": 5.354809965375507
+    "residual_std": 5.354809965375507,
+    "interval_coverage": 0.885,
+    "interval_nominal": 0.9,
+    "interval_width": 18.421181572053356
   },
   "threshold": null,
   "features": [
@@ -46,7 +49,7 @@
   "n_train": 800,
   "n_test": 200,
   "data_sha256": "1d32fe149100deae",
-  "train_seconds": 17.825134400001843,
+  "train_seconds": 23.998907800007146,
   "explainability": {
     "permutation_importance": [
       {
@@ -245,6 +248,7 @@
     "leaderboard": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\leaderboard.png",
     "tuning": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\tuning_history.png",
     "diagnostics": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\regression_diagnostics.png",
+    "intervals": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\prediction_intervals.png",
     "permutation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\permutation_importance.png",
     "shap_bar": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\shap_importance.png",
     "shap_beeswarm": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\shap_beeswarm.png",
@@ -258,8 +262,16 @@
     "platform": "Windows-10-10.0.19045-SP0"
   },
   "tracking": {
-    "run_id": "51668821ffcb481aa06f6a101e67edb5",
+    "run_id": "e69dc155921a43adab83a5d5cb2138e9",
     "experiment_id": "1",
     "tracking_uri": "sqlite:///C:/Users/WzA/Desktop/ZAIN/PAI/mlruns/mlflow.db"
+  },
+  "conformal": {
+    "alpha": 0.1,
+    "quantile": 9.239617288096852,
+    "n_calibration": 800,
+    "method": "cross-conformal, absolute out-of-fold residuals",
+    "lower_bound": 0.0,
+    "upper_bound": 100.0
   }
 }
