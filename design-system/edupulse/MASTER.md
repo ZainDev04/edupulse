@@ -1,233 +1,131 @@
-# Design System Master File
+# EduPulse design tokens
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
+This file records the visual decisions behind `web/`. The values here are the same ones declared in `web/src/app/globals.css`; if the two ever disagree, the stylesheet wins and this file needs updating. Page-level overrides would live in `design-system/pages/<page>.md`, but no page currently needs one.
 
----
+Project: EduPulse
+Last revised: 2026-09-16
+Stack: Next.js 16, Tailwind 4, shadcn/ui (`base-nova` style, Lucide icons), Recharts
 
-**Project:** EduPulse
-**Generated:** 2026-09-12 04:33:03
-**Category:** Smart Home/IoT Dashboard
-**Design Dials:** Variance 5/10 (Balanced / Modern) | Motion 3/10 (Subtle) | Density 8/10 (Dense / Dashboard)
+## Direction
 
----
+The site has two moods that share one token set.
 
-## Global Rules
+The landing page is editorial: a serif italic headline, a monospace eyebrow above each section, wide measure, numbers presented as typeset figures rather than dashboard tiles. It borrows from magazine layouts, not from SaaS templates.
 
-### Color Palette
+The app pages (`/overview`, `/predict`, `/leaderboard`, `/explain`, `/fairness`, `/monitoring`) are dense and dark, built from shadcn cards on a sidebar shell. Charts do most of the talking.
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#1E293B` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#334155` | `--color-secondary` |
-| On Secondary | `#FFFFFF` | `--color-on-secondary` |
-| Accent/CTA | `#22C55E` | `--color-accent` |
-| On Accent/CTA | `#0F172A` | `--color-on-accent` |
-| Background | `#0F172A` | `--color-background` |
-| Foreground | `#F8FAFC` | `--color-foreground` |
-| Card | `#1B2336` | `--color-card` |
-| Card Foreground | `#F8FAFC` | `--color-card-foreground` |
-| Muted | `#272F42` | `--color-muted` |
-| Muted Foreground | `#94A3B8` | `--color-muted-foreground` |
-| Border | `#475569` | `--color-border` |
-| Destructive | `#EF4444` | `--color-destructive` |
-| On Destructive | `#000000` | `--color-on-destructive` |
-| Ring | `#FFFFFF` | `--color-ring` |
+The root `<html>` element carries the `dark` class, so dark is the default everywhere. Marketing sections that want a light background add the `light` class to their wrapper and inherit the light token set.
 
-**Color Notes:** Dark tech + status green
+## Colour
 
-### Typography
+All colours are CSS custom properties consumed through Tailwind's `@theme inline` block, so classes such as `bg-primary`, `text-muted-foreground` and `border-risk-moderate/40` resolve to these values.
 
-- **Heading Font:** Fira Code
-- **Body Font:** Fira Sans
-- **Mood:** dashboard, data, analytics, code, technical, precise
-- **Google Fonts:** [Fira Code + Fira Sans](https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap)
+### Dark (default)
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
-```
+| Token | Value | Used for |
+|---|---|---|
+| `--background` | `#0f1220` | page background |
+| `--foreground` | `#f5f3ff` | body text |
+| `--card` | `#181a2b` | cards, popovers |
+| `--card-foreground` | `#f8fafc` | text on cards |
+| `--primary` | `#8b5cf6` | violet accent: buttons, links, focus ring, active nav |
+| `--primary-foreground` | `#0f172a` | text on primary |
+| `--secondary` | `#334155` | secondary buttons |
+| `--muted` | `#22253a` | subdued surfaces, table stripes |
+| `--muted-foreground` | `#9d9fb8` | captions, labels |
+| `--accent` | `#22253a` | hover surfaces |
+| `--destructive` | `#ef4444` | errors |
+| `--border` | `#2a2d45` | hairlines |
+| `--input` | `#475569` | form control borders |
+| `--ring` | `#8b5cf6` | focus ring |
+| `--sidebar` | `#0b0e1a` | app shell sidebar |
+| `--sidebar-accent` | `#181a2b` | sidebar hover and active item |
 
-### Spacing Variables
+### Light (`.light` wrapper, also the `:root` fallback)
 
-*Density: 8/10 — Dense / Dashboard*
+| Token | Value |
+|---|---|
+| `--background` | `#f4f7fb` |
+| `--foreground` | `#0f172a` |
+| `--card` | `#ffffff` |
+| `--primary` | `#6d28d9` |
+| `--primary-foreground` | `#f8fafc` |
+| `--secondary` | `#e2e8f0` |
+| `--muted` | `#e9eef5` |
+| `--muted-foreground` | `#475569` |
+| `--destructive` | `#dc2626` |
+| `--border`, `--input` | `#d5dde8` |
+| `--ring` | `#6d28d9` |
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `2px` / `0.125rem` | Tight gaps |
-| `--space-sm` | `4px` / `0.25rem` | Icon gaps, inline spacing |
-| `--space-md` | `8px` / `0.5rem` | Standard padding |
-| `--space-lg` | `12px` / `0.75rem` | Section padding |
-| `--space-xl` | `16px` / `1rem` | Large gaps |
-| `--space-2xl` | `24px` / `1.5rem` | Section margins |
-| `--space-3xl` | `32px` / `2rem` | Hero padding |
+The light primary is one step darker than the dark primary so both pass 4.5:1 against their backgrounds.
 
-### Shadow Depths
+### Charts
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+Five series colours, in the order Recharts picks them up.
 
----
+| Token | Dark | Light |
+|---|---|---|
+| `--chart-1` | `#8b5cf6` | `#7c3aed` |
+| `--chart-2` | `#38bdf8` | `#38bdf8` |
+| `--chart-3` | `#fbbf24` | `#f59e0b` |
+| `--chart-4` | `#22c55e` | `#22c55e` |
+| `--chart-5` | `#fb7185` | `#f43f5e` |
 
-## Component Specs
+Chart 1 is the model or "after" series. The mitigation figure rendered by the training pipeline (`reports/figures/`) uses a matplotlib palette of its own (`PALETTE` in `src/edupulse/models/evaluate.py`): grey `#94A3B8` for the global-threshold bars and indigo `#4F46E5` for the per-group bars, so the coloured series reads as the change.
 
-### Buttons
+### Risk bands
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #22C55E;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+These map to the `risk_band` field the API returns and are the same in both modes.
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
+| Token | Value | Band |
+|---|---|---|
+| `--risk-low` | `#22c55e` | low |
+| `--risk-moderate` | `#f59e0b` | moderate |
+| `--risk-high` | `#f97316` | high |
+| `--risk-critical` | `#ef4444` | critical |
 
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #1E293B;
-  border: 2px solid #1E293B;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
+The monitoring page reuses moderate for `warn` and critical for `alert`.
 
-### Cards
+## Type
 
-```css
-.card {
-  background: #0F172A;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+Three families, loaded through `next/font/google` in `web/src/app/layout.tsx` and exposed as CSS variables.
 
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
+| Role | Family | Variable | Weights |
+|---|---|---|---|
+| Body and UI | Inter | `--font-inter` | 300 to 700 |
+| Display | Playfair Display | `--font-playfair` | 400 to 700, italic included |
+| Mono | JetBrains Mono | `--font-jetbrains` | 400 to 600 |
 
-### Inputs
+`body` uses `font-sans` (Inter). Two helper classes carry the editorial voice:
 
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
+- `.font-display`: Playfair Display with `letter-spacing: -0.01em`. Used for the landing headline, section titles, and the large figures on the landing page.
+- `.eyebrow`: JetBrains Mono, `0.7rem`, `0.18em` tracking, uppercase. Used for the numbered section labels ("01. The problem") and small metadata lines.
 
-.input:focus {
-  border-color: #1E293B;
-  outline: none;
-  box-shadow: 0 0 0 3px #1E293B20;
-}
-```
+Numbers in the app (metrics, thresholds, probabilities) are set in the mono face so columns align.
 
-### Modals
+## Radius and spacing
 
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
+`--radius` is `0.625rem`. shadcn derives `--radius-sm` (−4px), `--radius-md` (−2px), `--radius-lg` (equal) and `--radius-xl` (+4px) from it. Spacing follows Tailwind's default 4px scale; there is no custom spacing scale.
 
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
+## Surfaces
 
----
-
-## Style Guidelines
-
-**Style:** Glassmorphism
-
-**Keywords:** Frosted glass, transparent, blurred background, layered, vibrant background, light source, depth, multi-layer
-
-**Best For:** Modern SaaS, financial dashboards, high-end corporate, lifestyle apps, modal overlays, navigation
-
-**Key Effects:** Backdrop blur (10-20px), subtle border (1px solid rgba white 0.2), light reflection, Z-depth
-
-### Page Pattern
-
-**Pattern Name:** Real-Time / Operations Landing
-
-- **Conversion Strategy:** Offer a demo or sandbox and show trust signals. Label telemetry as live only when backed by a current source, with update time and stale state. Provide pause/hide or update-frequency controls for tickers and previews, stop offscreen/hidden work, support keyboard controls, and render a static final snapshot under reduced motion.
-- **CTA Placement:** Primary CTA in nav + After metrics
-- **Section Order:** Hero (product + live preview or status) > Key metrics/indicators > How it works > CTA (Start trial / Contact)
-
----
+`.glass` is the card treatment on dark pages: the card colour at 88% opacity mixed in oklab, a 12px backdrop blur, and a border at 80% of `--border`. It is applied on top of the shadcn `Card` component rather than replacing it, so `<Card className="glass">` is the usual form.
 
 ## Motion
 
-**Scroll Reveal** (Subtle) — Trigger: scroll (viewport enter) | Duration: 300-400ms | Easing: `power1.out`
+One pattern, implemented without a library.
 
-```js
-gsap.from(el, { opacity: 0, y: 12, duration: 0.35, ease: 'power1.out', scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' } });
-```
+`.reveal` starts at `opacity: 0; translateY(16px)` and transitions both over 600ms with `cubic-bezier(0.22, 1, 0.36, 1)`. The `Reveal` component in `web/src/components/marketing/reveal.tsx` adds `is-visible` the first time the element enters the viewport (IntersectionObserver, `threshold: 0.1`, bottom margin −10%) and then disconnects. A `delay` prop staggers siblings through `transition-delay`.
 
-**Framework notes:** Requires the ScrollTrigger plugin registered once via gsap.registerPlugin(ScrollTrigger); Use matchMedia('(prefers-reduced-motion: reduce)') to skip non-essential motion and render the final state immediately
+Under `prefers-reduced-motion: reduce`, `.reveal` renders in its final state with no transition, and a global rule shortens every animation and transition to 0.01ms. Browsers without IntersectionObserver get the visible state immediately.
 
-- ✅ Keep the y offset small (8-16px) so it reads as a fade, not a slide
-- ❌ Don't reveal below-the-fold content needed for SEO/crawlers as invisible-by-default without a no-JS fallback
-- ⚡ toggleActions 'play none none reverse' avoids re-triggering on every scroll direction change
+App pages do not use scroll reveals; they only have the hover and focus transitions that shadcn ships.
 
----
+## Rules of thumb
 
-## Anti-Patterns (Do NOT Use)
-
-- ❌ Slow updates
-- ❌ No automation
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
-
----
-
-## Pre-Delivery Checklist
-
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+- Icons come from Lucide, never from emoji.
+- Text on any surface keeps at least 4.5:1 contrast; check both modes when adding a colour.
+- Every interactive element shows a visible focus ring (`outline-ring/50` is set globally).
+- Hover effects change colour or shadow, not layout.
+- Layouts are checked at 375, 768, 1024 and 1440px, with no horizontal scroll on the narrowest.
+- The landing page fetches its headline numbers from the API at request time and falls back to the constants in `web/src/app/(marketing)/page.tsx` when the API is asleep. The swap is silent, so keep those constants equal to the committed model cards.
