@@ -37,3 +37,8 @@ Thumbs.db
 
 # Personal study guide, not part of the repo
 guide.pdf
+
+# Files dropped by Next.js and shadcn tooling for coding agents; not part of the project
+web/AGENTS.md
+web/CLAUDE.md
+CLAUDE.md
