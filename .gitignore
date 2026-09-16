@@ -34,3 +34,6 @@ Thumbs.db
 # Stray screenshots in the project root
 /*.png
 /*.jpg
+
+# Personal study guide, not part of the repo
+guide.pdf
