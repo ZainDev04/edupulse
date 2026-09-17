@@ -1,7 +1,10 @@
+import { AppReveal } from "@/components/app-reveal";
+
 /**
- * Re-mounted on every navigation inside the app group, so the enter
- * animation in globals.css (.ep-page) plays each time a page changes.
+ * Re-mounted on every navigation inside the app group, so the page enter
+ * animation (.ep-page in globals.css) plays each time and the section
+ * reveal starts fresh.
  */
 export default function AppTemplate({ children }: { children: React.ReactNode }) {
-  return <div className="ep-page">{children}</div>;
+  return <AppReveal>{children}</AppReveal>;
 }

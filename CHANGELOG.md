@@ -7,7 +7,7 @@ Notable changes to this project are recorded here. The format follows [Keep a Ch
 ### Changed
 - App pages restyled on a splash layout: aurora hero, stat tiles with gradient numerals, panels and chips, Inter Tight headings; shared pieces in `web/src/components/splash.tsx`. Light is the default theme with a switch in every page header; the choice is kept in localStorage. The landing page is unchanged.
 - Web screenshots in the README refreshed.
-- App pages animate in on navigation (fade and rise, sections staggered) and a skeleton shows while the next page waits on the API; both respect `prefers-reduced-motion`.
+- App pages animate in on navigation and a skeleton shows while the next page waits on the API. Sections in view rise in with a stagger; the rest reveal as they scroll into view (`components/app-reveal.tsx`, Web Animations API). Off under `prefers-reduced-motion`.
 - Landing page: the hero lines and stats strip rise in one after another on first paint, the nav fades in and the glow behind the hero drifts slowly; off under `prefers-reduced-motion`.
 
 ### Fixed

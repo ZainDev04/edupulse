@@ -301,8 +301,9 @@
 .dark .ep-tile-amber { --ep-from: #fde68a; --ep-to: #fb923c; --ep-glow: rgba(251, 146, 60, 0.35); }
 .dark .ep-tile-rose { --ep-from: #fda4af; --ep-to: #fb923c; --ep-glow: rgba(251, 113, 133, 0.35); }
 
-/* Page enter animation for the app group (see app/(app)/template.tsx).
-   The page fades and rises; its sections follow with a short stagger. */
+/* App pages: the page fades in on each navigation (template.tsx). Section
+   reveals on load and on scroll are driven by components/app-reveal.tsx
+   through the Web Animations API, so there is no CSS for them here. */
 @keyframes ep-rise {
   from {
     opacity: 0;
@@ -316,17 +317,8 @@
 .ep-page {
   animation: ep-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.ep-page > * > * {
-  animation: ep-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.ep-page > * > :nth-child(2) { animation-delay: 60ms; }
-.ep-page > * > :nth-child(3) { animation-delay: 120ms; }
-.ep-page > * > :nth-child(4) { animation-delay: 180ms; }
-.ep-page > * > :nth-child(5) { animation-delay: 240ms; }
-.ep-page > * > :nth-child(n + 6) { animation-delay: 300ms; }
 @media (prefers-reduced-motion: reduce) {
-  .ep-page,
-  .ep-page > * > * {
+  .ep-page {
     animation: none;
   }
 }
