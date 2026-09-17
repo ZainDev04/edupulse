@@ -48,7 +48,7 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
 
       {fair.mitigated && <Mitigation m={fair.mitigated} before={fair.groups} threshold={info.threshold} />}
 
-      <section className="flex flex-col gap-6" aria-labelledby="slices-heading">
+      <section className="flex flex-col gap-6" data-reveal="items" aria-labelledby="slices-heading">
         <SectionHeading
           id="slices-heading"
           eyebrow="Per attribute"
