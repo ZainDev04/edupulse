@@ -78,7 +78,7 @@ export default async function OverviewPage() {
         </Button>
       </PageHero>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Key figures">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" data-reveal="items" aria-label="Key figures">
         <Tile tone="violet" icon={Users} value={stats.n_students.toLocaleString()} label="Students" hint="rows after cleaning" />
         <Tile tone="amber" icon={ShieldAlert} value={pct(stats.at_risk_rate)} label="At-risk rate" hint="average score below 60" />
         <Tile tone="blue" icon={GraduationCap} value={stats.average_score.toFixed(1)} label="Average score" hint="mean of math, reading, writing" />

@@ -42,23 +42,36 @@ export function AppReveal({ children }: { children: React.ReactNode }) {
       { rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
     );
 
+    /** A section reveals as one block unless it is, or directly holds, a
+     *  data-reveal="items" grid, whose children then cascade one by one. */
+    const targets = (section: Element): HTMLElement[] => {
+      if (section.matches("[data-reveal=items]")) return Array.from(section.children) as HTMLElement[];
+      if (!section.querySelector(":scope > [data-reveal=items]")) return [section as HTMLElement];
+      return (Array.from(section.children) as HTMLElement[]).flatMap((child) =>
+        child.matches("[data-reveal=items]") ? (Array.from(child.children) as HTMLElement[]) : [child],
+      );
+    };
+
     const scan = () => {
       const page = root.firstElementChild;
       if (!page) return;
       let order = 0;
-      for (const el of Array.from(page.children) as HTMLElement[]) {
-        if (seen.has(el)) continue;
-        seen.add(el);
-        if (el.getBoundingClientRect().top < window.innerHeight) {
-          el.animate(KEYFRAMES, { ...TIMING, delay: Math.min(order, 5) * STAGGER_MS });
-          order += 1;
-        } else {
-          // Held on the first frame (hidden) until the section scrolls into view
-          const a = el.animate(KEYFRAMES, TIMING);
-          a.pause();
-          pending.set(el, a);
-          io.observe(el);
-        }
+      for (const section of Array.from(page.children)) {
+        if (seen.has(section)) continue;
+        seen.add(section);
+        targets(section).forEach((el, i) => {
+          if (el.getBoundingClientRect().top < window.innerHeight) {
+            el.animate(KEYFRAMES, { ...TIMING, delay: Math.min(order, 8) * STAGGER_MS });
+            order += 1;
+          } else {
+            // Held on the first frame (hidden) until it scrolls into view;
+            // items of one group keep their cascade when they arrive together
+            const a = el.animate(KEYFRAMES, { ...TIMING, delay: Math.min(i, 8) * STAGGER_MS });
+            a.pause();
+            pending.set(el, a);
+            io.observe(el);
+          }
+        });
       }
     };
 

@@ -148,7 +148,7 @@ function Mitigation({ m, before, threshold }: { m: Mitigated; before: FairnessGr
         }
         description="One global threshold over-flags one group and under-serves the other. Choosing the cut-off per group on out-of-fold probabilities gives every group the same target recall."
       />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" data-reveal="items">
         <Tile tone="rose" icon={Scale} label="Recall gap before" value={fmt(tprGapBefore, 3)} hint="one global threshold" />
         <Tile tone="green" icon={ShieldCheck} label="Recall gap after" value={fmt(tprGapAfter, 3)} hint="per-group thresholds" />
         <Tile

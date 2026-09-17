@@ -61,7 +61,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
         </div>
       )}
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Selected model">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" data-reveal="items" aria-label="Selected model">
         <Tile tone="violet" icon={Award} label="Selected model" value={titleCase(info.model)} hint={info.model_class} />
         <Tile tone="blue" icon={Target} label={`CV ${metric}`} value={fmt(info.cv_score)} hint={`± ${fmt(Number(best[stdKey]))} across folds`} />
         <Tile tone="green" icon={Cpu} label={holdout.label} value={fmt(holdout.value)} hint="200 held-out students" />
