@@ -280,3 +280,17 @@
 .ov-tile-blue { --ov-from: #7dd3fc; --ov-to: #60a5fa; --ov-glow: rgba(59, 130, 246, 0.4); }
 .ov-tile-green { --ov-from: #a3e635; --ov-to: #34d399; --ov-glow: rgba(52, 211, 153, 0.35); }
 .ov-tile-amber { --ov-from: #fde68a; --ov-to: #fb923c; --ov-glow: rgba(251, 146, 60, 0.35); }
+
+/* Light variants for the overview page (toggle in overview-theme-toggle.tsx).
+   The aurora hero stays dark in both modes. */
+.light .ov-tile {
+  background-color: #ffffff;
+  border-color: var(--border);
+}
+.light .ov-tile-violet { --ov-from: #6d28d9; --ov-to: #be185d; --ov-glow: rgba(167, 139, 250, 0.35); }
+.light .ov-tile-blue { --ov-from: #1d4ed8; --ov-to: #0369a1; --ov-glow: rgba(125, 211, 252, 0.4); }
+.light .ov-tile-green { --ov-from: #15803d; --ov-to: #0f766e; --ov-glow: rgba(110, 231, 183, 0.4); }
+.light .ov-tile-amber { --ov-from: #b45309; --ov-to: #c2410c; --ov-glow: rgba(253, 186, 116, 0.4); }
+.light .ov-gradient-text {
+  background-image: linear-gradient(92deg, var(--ov-from, #6d28d9), var(--ov-to, #be185d));
+}

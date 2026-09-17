@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OfflineNotice } from "@/components/offline-notice";
+import { OVERVIEW_THEME_KEY, OverviewThemeToggle } from "@/components/overview-theme-toggle";
 
 const PILL = "rounded-full px-5 text-sm font-medium focus-visible:ring-4 focus-visible:ring-ring/60";
 
@@ -49,8 +50,17 @@ export default async function OverviewPage() {
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-10">
+      {/* Applies the stored overview theme before hydration so there is no flash */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `try{if(localStorage.getItem(${JSON.stringify(OVERVIEW_THEME_KEY)})==="light"){var r=document.documentElement;r.classList.remove("dark");r.classList.add("light")}}catch(e){}`,
+        }}
+      />
       {/* Hero */}
       <section className="ov-aurora relative overflow-hidden rounded-[28px] border border-white/10 px-6 py-14 text-center sm:px-10 sm:py-20">
+        <div className="absolute top-4 right-4">
+          <OverviewThemeToggle />
+        </div>
         <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-6">
           <div className="flex flex-wrap items-center justify-center gap-2">
             <span className="rounded-full bg-sky-500/90 px-3 py-1 text-xs font-semibold text-white">
@@ -181,7 +191,7 @@ export default async function OverviewPage() {
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
                 <span className="ov-headline text-base">{title}</span>
-                <span className="text-sm text-violet-300">{sub}</span>
+                <span className="text-sm text-violet-700 dark:text-violet-300">{sub}</span>
                 <span className="mt-auto inline-flex items-center gap-1 text-xs text-muted-foreground group-hover:text-foreground">
                   Open <ArrowUpRight className="size-3.5" aria-hidden="true" />
                 </span>
@@ -219,8 +229,8 @@ function Tile({
     <div className={`ov-tile ov-tile-${tone} flex min-h-40 flex-col justify-between rounded-3xl p-6`}>
       <div className="relative flex items-center justify-between">
         <span className="text-sm font-medium text-foreground/80">{label}</span>
-        <span className="flex size-9 items-center justify-center rounded-full bg-white/10">
-          <Icon className="size-4 text-white" aria-hidden="true" />
+        <span className="flex size-9 items-center justify-center rounded-full bg-foreground/10">
+          <Icon className="size-4 text-foreground" aria-hidden="true" />
         </span>
       </div>
       <div className="relative">
@@ -248,11 +258,11 @@ function ModelCard({ task, info }: { task: TaskName; info: ModelInfo }) {
       </CardHeader>
       <CardContent className="relative flex flex-col gap-4">
         <dl className="grid grid-cols-2 gap-3 text-sm">
-          <div className="rounded-xl bg-white/5 p-3">
+          <div className="rounded-xl bg-foreground/5 p-3">
             <dt className="text-xs text-muted-foreground">Cross-validation {info.cv_metric}</dt>
             <dd className="ov-headline mt-1 text-2xl tabular-nums">{fmt(info.cv_score)}</dd>
           </div>
-          <div className="rounded-xl bg-white/5 p-3">
+          <div className="rounded-xl bg-foreground/5 p-3">
             <dt className="text-xs text-muted-foreground">Hold-out {h.label}</dt>
             <dd className="ov-headline mt-1 text-2xl tabular-nums">{h.value}</dd>
             <dd className="font-mono text-xs text-muted-foreground">{h.secondary}</dd>
@@ -267,7 +277,7 @@ function ModelCard({ task, info }: { task: TaskName; info: ModelInfo }) {
           </span>
           <Link
             href={`/leaderboard?task=${task}`}
-            className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium text-violet-300 hover:text-violet-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/50"
+            className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/50"
           >
             Leaderboard <ArrowUpRight className="size-3.5" aria-hidden="true" />
           </Link>
@@ -287,7 +297,7 @@ function ChipGroup({ title, rows }: { title: string; rows: { group: string; n: n
             key={r.group}
             className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 py-1.5 pr-2 pl-2.5 text-sm"
           >
-            <CheckCircle2 className="size-4 text-lime-400" aria-hidden="true" />
+            <CheckCircle2 className="size-4 text-lime-600 dark:text-lime-400" aria-hidden="true" />
             <span>{r.group}</span>
             <span className="text-xs text-muted-foreground">n={r.n}</span>
             <span className="ov-gradient-text font-mono text-sm font-semibold tabular-nums">{pct(r.at_risk_rate, 0)}</span>
