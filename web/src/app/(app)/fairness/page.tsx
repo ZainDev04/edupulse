@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
+import { AlertTriangle, CheckCircle2, Scale, ShieldCheck, Users } from "lucide-react";
 import { api, fmt, titleCase, type FairnessGroup, type Mitigated, type TaskName } from "@/lib/api";
 import { GroupedBars } from "@/components/charts/bar-charts";
 import { OfflineNotice } from "@/components/offline-notice";
 import { TaskPicker } from "@/components/task-picker";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Accent, Chip, PageHero, Panel, SectionHeading, Tile } from "@/components/splash";
 
 export const metadata: Metadata = { title: "Fairness" };
 
@@ -33,36 +33,54 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
         : [{ key: "accuracy", label: "accuracy" }];
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
-      <section className="flex flex-col gap-3">
-        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Fairness audit</h1>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          Hold-out performance sliced by sensitive attribute. For an early-warning tool the gap that matters most is
-          recall: are at-risk students caught at the same rate in every group? Some difference in selection rate is
-          expected because base rates genuinely differ, for example free/reduced-lunch students are at risk about
-          twice as often. A disparate-impact ratio below 0.8 is the conventional four-fifths warning level.
-        </p>
+    <div className="mx-auto flex max-w-7xl flex-col gap-8">
+      <PageHero
+        compact
+        eyebrows={[
+          `${attributes.length} sensitive attributes`,
+          fair.mitigated ? `Recall equalised across ${fair.mitigated.attribute}` : "Hold-out slices, 200 students",
+        ]}
+        title="Fairness audit"
+        description="Hold-out performance sliced by sensitive attribute. For an early-warning tool the gap that matters most is recall: are at-risk students caught at the same rate in every group? Some difference in selection rate is expected because base rates genuinely differ. A disparate-impact ratio below 0.8 is the conventional four-fifths warning level."
+      >
         <TaskPicker tasks={TASKS} current={task} />
-      </section>
+      </PageHero>
 
-      {fair.mitigated && <MitigationCard m={fair.mitigated} before={fair.groups} threshold={info.threshold} />}
+      {fair.mitigated && <Mitigation m={fair.mitigated} before={fair.groups} threshold={info.threshold} />}
 
-      {attributes.map((attr) => {
-        const groups = fair.groups.filter((g) => g.attribute === attr);
-        const gaps = fair.summary[attr] ?? {};
-        return (
-          <Card key={attr} className="glass">
-            <CardHeader>
-              <CardTitle>{titleCase(attr)}</CardTitle>
-              <CardDescription className="flex flex-wrap gap-2">
-                {Object.entries(gaps).map(([k, val]) => (
-                  <Badge key={k} variant={k === "disparate_impact_ratio" && val < 0.8 ? "destructive" : "outline"}>
-                    {k.replace(/_/g, " ")}: {fmt(val, 3)}
-                  </Badge>
-                ))}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+      <section className="flex flex-col gap-6" aria-labelledby="slices-heading">
+        <SectionHeading
+          id="slices-heading"
+          eyebrow="Per attribute"
+          title={
+            <>
+              Same model, <Accent>every group</Accent>
+            </>
+          }
+          description="Gap chips summarise each attribute. A disparate-impact ratio under 0.8 is marked in red."
+        />
+        {attributes.map((attr) => {
+          const groups = fair.groups.filter((g) => g.attribute === attr);
+          const gaps = fair.summary[attr] ?? {};
+          return (
+            <Panel
+              key={attr}
+              tone="blue"
+              title={titleCase(attr)}
+              description={
+                <span className="flex flex-wrap gap-2 pt-1">
+                  {Object.entries(gaps).map(([k, val]) => {
+                    const bad = k === "disparate_impact_ratio" && val < 0.8;
+                    return (
+                      <Chip key={k} icon={bad ? AlertTriangle : CheckCircle2} tone={bad ? "alert" : "default"} value={fmt(val, 3)}>
+                        {k.replace(/_/g, " ")}
+                      </Chip>
+                    );
+                  })}
+                </span>
+              }
+              contentClassName="grid grid-cols-1 gap-6 xl:grid-cols-5"
+            >
               <div className="xl:col-span-3">
                 <GroupedBars
                   data={groups.map((g) => ({ group: g.group, ...pick(g, metrics.map((m) => m.key)) }))}
@@ -98,15 +116,15 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
                   </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+            </Panel>
+          );
+        })}
+      </section>
     </div>
   );
 }
 
-function MitigationCard({ m, before, threshold }: { m: Mitigated; before: FairnessGroup[]; threshold: number | null }) {
+function Mitigation({ m, before, threshold }: { m: Mitigated; before: FairnessGroup[]; threshold: number | null }) {
   const b = new Map(before.filter((g) => g.attribute === m.attribute).map((g) => [g.group, g]));
   const rows = m.groups
     .filter((g) => g.attribute === m.attribute)
@@ -119,64 +137,74 @@ function MitigationCard({ m, before, threshold }: { m: Mitigated; before: Fairne
     { group: `${r.group} (per-group)`, recall: r.after.tpr ?? 0, "selection rate": r.after.selection_rate ?? 0 },
   ]);
   return (
-    <Card className="glass border-primary/40">
-      <CardHeader>
-        <CardTitle>Mitigation: recall equalised across {titleCase(m.attribute)}</CardTitle>
-        <CardDescription className="flex flex-wrap gap-2">
-          <Badge variant="outline">recall gap before: {fmt(tprGapBefore, 3)}</Badge>
-          <Badge variant="outline">recall gap after: {fmt(tprGapAfter, 3)}</Badge>
-          <Badge variant="outline">
-            overall recall {fmt(m.overall_before.recall, 2)} to {fmt(m.overall_after.recall, 2)}
-          </Badge>
-          <Badge variant="outline">
-            precision {fmt(m.overall_before.precision, 2)} to {fmt(m.overall_after.precision, 2)}
-          </Badge>
-          <Badge variant="outline">
-            flagged {fmt(m.overall_before.flagged_rate * 100, 1)}% to {fmt(m.overall_after.flagged_rate * 100, 1)}%
-          </Badge>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+    <section className="flex flex-col gap-6" aria-labelledby="mitigation-heading">
+      <SectionHeading
+        id="mitigation-heading"
+        eyebrow="Mitigation"
+        title={
+          <>
+            Recall equalised across <Accent>{titleCase(m.attribute)}</Accent>
+          </>
+        }
+        description="One global threshold over-flags one group and under-serves the other. Choosing the cut-off per group on out-of-fold probabilities gives every group the same target recall."
+      />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Tile tone="rose" icon={Scale} label="Recall gap before" value={fmt(tprGapBefore, 3)} hint="one global threshold" />
+        <Tile tone="green" icon={ShieldCheck} label="Recall gap after" value={fmt(tprGapAfter, 3)} hint="per-group thresholds" />
+        <Tile
+          tone="violet"
+          icon={Users}
+          label="Overall recall"
+          value={`${fmt(m.overall_before.recall, 2)} to ${fmt(m.overall_after.recall, 2)}`}
+          hint={`precision ${fmt(m.overall_before.precision, 2)} to ${fmt(m.overall_after.precision, 2)}`}
+        />
+        <Tile
+          tone="amber"
+          icon={AlertTriangle}
+          label="Flagged"
+          value={`${fmt(m.overall_before.flagged_rate * 100, 1)}% to ${fmt(m.overall_after.flagged_rate * 100, 1)}%`}
+          hint="share of students flagged"
+        />
+      </div>
+      <Panel
+        tone="violet"
+        title="Global threshold against per-group thresholds"
+        description="The model is unchanged; the API returns both flags so the choice stays visible."
+        contentClassName="grid grid-cols-1 gap-6 xl:grid-cols-5"
+      >
         <div className="xl:col-span-3">
           <GroupedBars data={chart} metrics={[{ key: "recall", label: "recall (TPR)" }, { key: "selection rate", label: "selection rate" }]} format="fixed2" />
         </div>
-        <div className="flex flex-col gap-3 xl:col-span-2">
-          <p className="text-sm text-muted-foreground">
-            One global threshold over-flags one group and under-serves the other. Choosing the cut-off per group on
-            out-of-fold probabilities gives every group the same target recall. The model is unchanged; the API
-            returns both flags so the choice stays visible.
-          </p>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Group</TableHead>
-                  <TableHead className="text-right">threshold</TableHead>
-                  <TableHead className="text-right">recall</TableHead>
-                  <TableHead className="text-right">selection</TableHead>
+        <div className="overflow-x-auto xl:col-span-2">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Group</TableHead>
+                <TableHead className="text-right">threshold</TableHead>
+                <TableHead className="text-right">recall</TableHead>
+                <TableHead className="text-right">selection</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((r) => (
+                <TableRow key={r.group}>
+                  <TableCell>{r.group}</TableCell>
+                  <TableCell className="text-right font-mono text-xs">
+                    {fmt(threshold ?? 0, 2)} → {fmt(r.threshold, 2)}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">
+                    {fmt(r.before?.tpr ?? 0, 2)} → {fmt(r.after.tpr ?? 0, 2)}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs">
+                    {fmt(r.before?.selection_rate ?? 0, 2)} → {fmt(r.after.selection_rate ?? 0, 2)}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((r) => (
-                  <TableRow key={r.group}>
-                    <TableCell>{r.group}</TableCell>
-                    <TableCell className="text-right font-mono text-xs">
-                      {fmt(threshold ?? 0, 2)} → {fmt(r.threshold, 2)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs">
-                      {fmt(r.before?.tpr ?? 0, 2)} → {fmt(r.after.tpr ?? 0, 2)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs">
-                      {fmt(r.before?.selection_rate ?? 0, 2)} → {fmt(r.after.selection_rate ?? 0, 2)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </div>
-      </CardContent>
-    </Card>
+      </Panel>
+    </section>
   );
 }
 

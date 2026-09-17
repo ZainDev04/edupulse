@@ -23,7 +23,8 @@ import { ContributionBars } from "@/components/charts/bar-charts";
 import { ProgressRadial } from "@/components/ui/progress-radial";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Panel } from "@/components/splash";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -110,17 +111,17 @@ export function PredictForm({ tasks, thresholds }: { tasks: TaskName[]; threshol
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
-      <Card className="glass xl:col-span-2">
-        <CardHeader>
-          <CardTitle>Student</CardTitle>
-          <CardDescription>Background attributes as recorded at enrolment. Scores only where the task needs them.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={submit} className="flex flex-col gap-5">
+      <Panel
+        tone="violet"
+        className="xl:col-span-2"
+        title="Student"
+        description="Background attributes as recorded at enrolment. Scores only where the task needs them."
+      >
+        <form onSubmit={submit} className="flex flex-col gap-5">
             <Tabs value={task} onValueChange={(v) => { setTask(v as TaskName); setResult(null); }}>
-              <TabsList aria-label="Prediction task" className="w-full">
+              <TabsList aria-label="Prediction task" className="h-10 w-full rounded-full p-1">
                 {tasks.map((t) => (
-                  <TabsTrigger key={t} value={t} className="flex-1">
+                  <TabsTrigger key={t} value={t} className="flex-1 rounded-full">
                     {TASK_LABEL[t].split(" ")[0]}
                   </TabsTrigger>
                 ))}
@@ -156,7 +157,7 @@ export function PredictForm({ tasks, thresholds }: { tasks: TaskName[]; threshol
               Explain with SHAP
             </label>
 
-            <Button type="submit" disabled={pending} className="min-h-11">
+            <Button type="submit" disabled={pending} className="min-h-11 rounded-full text-sm">
               {pending && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
               {pending ? "Scoring" : "Predict"}
             </Button>
@@ -167,13 +168,12 @@ export function PredictForm({ tasks, thresholds }: { tasks: TaskName[]; threshol
                 {error}
               </p>
             )}
-          </form>
-        </CardContent>
-      </Card>
+        </form>
+      </Panel>
 
       <div className="flex flex-col gap-4 xl:col-span-3" aria-live="polite">
         {!result && !pending && (
-          <Card className="glass flex min-h-64 items-center justify-center">
+          <Card className="ep-tile flex min-h-64 items-center justify-center rounded-3xl">
             <CardContent className="text-center text-sm text-muted-foreground">
               Fill in the form and press Predict. The result and its explanation appear here.
             </CardContent>
@@ -226,14 +226,12 @@ function SelectField({
 function AtRiskResult({ data, threshold }: { data: AtRiskPrediction; threshold: number | null }) {
   const p = data.probability * 100;
   return (
-    <Card className="glass">
-      <CardHeader>
-        <CardTitle>Probability of averaging below 60</CardTitle>
-        <CardDescription>
-          Decision threshold {fmt(threshold ?? data.threshold, 2)}, chosen so that at least 80% of at-risk students are caught on out-of-fold data.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+    <Panel
+      tone="amber"
+      title="Probability of averaging below 60"
+      description={`Decision threshold ${fmt(threshold ?? data.threshold, 2)}, chosen so that at least 80% of at-risk students are caught on out-of-fold data.`}
+      contentClassName="flex flex-col items-center gap-6 sm:flex-row sm:items-start"
+    >
         <ProgressRadial
           value={p}
           threshold={(threshold ?? data.threshold) * 100}
@@ -242,7 +240,7 @@ function AtRiskResult({ data, threshold }: { data: AtRiskPrediction; threshold: 
           indicatorClassName={BAND_CLASS[data.risk_band]}
         >
           <div className="flex flex-col items-center">
-            <span className="font-mono text-4xl font-semibold tabular-nums">{p.toFixed(1)}%</span>
+            <span className="ep-headline text-4xl tabular-nums">{p.toFixed(1)}%</span>
             <span className={cn("text-xs font-medium uppercase", BAND_CLASS[data.risk_band])}>{data.risk_band}</span>
           </div>
         </ProgressRadial>
@@ -269,29 +267,27 @@ function AtRiskResult({ data, threshold }: { data: AtRiskPrediction; threshold: 
             This is a triage signal for prioritising support. It is not a judgement about the student.
           </dd>
         </dl>
-      </CardContent>
-    </Card>
+    </Panel>
   );
 }
 
 function ScoreResult({ data }: { data: ScorePrediction }) {
   return (
-    <Card className="glass">
-      <CardHeader>
-        <CardTitle>Expected math score</CardTitle>
-        <CardDescription>Ridge regression on background plus reading and writing. Hold-out RMSE is about 5.4 points.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+    <Panel
+      tone="blue"
+      title="Expected math score"
+      description="Ridge regression on background plus reading and writing. Hold-out RMSE is about 5.4 points."
+      contentClassName="flex flex-col gap-3"
+    >
         <div className="flex items-baseline gap-3">
-          <span className="font-mono text-5xl font-semibold tabular-nums">{data.prediction.toFixed(1)}</span>
+          <span className="ep-headline ep-gradient-text text-6xl tabular-nums">{data.prediction.toFixed(1)}</span>
           <span className="text-muted-foreground">/ 100</span>
           <span className="ml-auto font-mono text-xs text-muted-foreground">v{data.model_version}</span>
         </div>
         {data.lower != null && data.upper != null && data.confidence != null && (
           <IntervalBar lower={data.lower} upper={data.upper} point={data.prediction} confidence={data.confidence} />
         )}
-      </CardContent>
-    </Card>
+    </Panel>
   );
 }
 
@@ -316,13 +312,13 @@ function LevelResult({ data }: { data: LevelPrediction }) {
   const order = ["low", "medium", "high"] as const;
   const colour = { low: "bg-risk-critical", medium: "bg-risk-moderate", high: "bg-risk-low" };
   return (
-    <Card className="glass">
-      <CardHeader>
-        <CardTitle>Performance level</CardTitle>
-        <CardDescription>Predicted tier from all three scores. This task is a leakage case study; see the leaderboard note.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <span className="font-mono text-4xl font-semibold uppercase">{data.label}</span>
+    <Panel
+      tone="green"
+      title="Performance level"
+      description="Predicted tier from all three scores. This task is a leakage case study; see the leaderboard note."
+      contentClassName="flex flex-col gap-4"
+    >
+        <span className="ep-headline ep-gradient-text text-5xl uppercase">{data.label}</span>
         <ul className="flex flex-col gap-2">
           {order.map((k) => (
             <li key={k} className="flex items-center gap-3 text-sm">
@@ -334,24 +330,18 @@ function LevelResult({ data }: { data: LevelPrediction }) {
             </li>
           ))}
         </ul>
-      </CardContent>
-    </Card>
+    </Panel>
   );
 }
 
 function Explanation({ rows, kind }: { rows: Contribution[]; kind: TaskName }) {
   const unit = kind === "math_score" ? "score points" : kind === "at_risk" ? "log-odds of being at risk" : "log-odds of the predicted tier";
   return (
-    <Card className="glass">
-      <CardHeader>
-        <CardTitle>Why</CardTitle>
-        <CardDescription>
-          SHAP contributions summed to the original features, in {unit}. Red pushes the prediction up, violet pushes it down.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ContributionBars data={[...rows].sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))} />
-      </CardContent>
-    </Card>
+    <Panel
+      title="Why"
+      description={`SHAP contributions summed to the original features, in ${unit}. Red pushes the prediction up, violet pushes it down.`}
+    >
+      <ContributionBars data={[...rows].sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))} />
+    </Panel>
   );
 }

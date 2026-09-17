@@ -18,9 +18,14 @@ export function TaskPicker({ tasks, current }: { tasks: TaskName[]; current: Tas
         router.push(`${pathname}?${next.toString()}`);
       }}
     >
-      <TabsList aria-label="Task">
+      {/* Lives inside the dark hero, so colours are explicit rather than theme tokens */}
+      <TabsList aria-label="Task" className="h-auto flex-wrap justify-center gap-1 rounded-full bg-white/10 p-1 backdrop-blur">
         {tasks.map((t) => (
-          <TabsTrigger key={t} value={t}>
+          <TabsTrigger
+            key={t}
+            value={t}
+            className="h-9 flex-none rounded-full px-4 text-white/75 hover:text-white focus-visible:ring-white/50 data-active:bg-white data-active:text-slate-900 data-active:shadow-none dark:text-white/75 dark:hover:text-white dark:data-active:border-transparent dark:data-active:bg-white dark:data-active:text-slate-900"
+          >
             {TASK_LABEL[t]}
           </TabsTrigger>
         ))}

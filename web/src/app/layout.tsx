@@ -8,7 +8,7 @@ const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-// Only the overview page uses this (see .ov-headline in globals.css)
+// Display face for the app pages (see .ep-headline in globals.css)
 const interTight = Inter_Tight({
   variable: "--font-inter-tight",
   subsets: ["latin"],
@@ -41,7 +41,11 @@ export const dynamic = "force-dynamic";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${interTight.variable} ${playfair.variable} ${jetbrains.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`dark ${inter.variable} ${interTight.variable} ${playfair.variable} ${jetbrains.variable} h-full antialiased`}
+    >
       <body className="min-h-full">{children}</body>
     </html>
   );

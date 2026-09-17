@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* Orientation variants the shadcn base-nova primitives (slider, tabs, separator) rely on */
+@custom-variant data-horizontal (&[data-orientation="horizontal"]);
+@custom-variant data-vertical (&[data-orientation="vertical"]);
 
 /* EduPulse design tokens (see design-system/edupulse/MASTER.md).
    Dark is the primary mode; light is derived from the same slate scale. */
@@ -242,55 +245,58 @@
   }
 }
 
-/* Overview page only. Splash-style treatment after the Elementra theme:
-   tight display type, aurora hero, gradient numerals, pill chips. */
-.ov-headline {
+/* App pages. Splash-style treatment after the Elementra theme: tight
+   display type, aurora hero, gradient numerals, glow tiles, pill chips.
+   Light is the default; .dark values follow each block. */
+.ep-headline {
   font-family: var(--font-inter-tight), var(--font-inter), ui-sans-serif, sans-serif;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.05;
 }
-.ov-aurora {
+.ep-aurora {
   background-color: #0b0e1a;
   background-image:
     radial-gradient(55% 80% at 12% 18%, rgba(59, 130, 246, 0.45), transparent 62%),
     radial-gradient(45% 70% at 88% 8%, rgba(168, 85, 247, 0.55), transparent 60%),
     radial-gradient(60% 55% at 55% 110%, rgba(236, 72, 153, 0.35), transparent 65%);
 }
-.ov-gradient-text {
-  background-image: linear-gradient(92deg, var(--ov-from, #c084fc), var(--ov-to, #f472b6));
+.ep-gradient-text {
+  background-image: linear-gradient(92deg, var(--ep-from, #6d28d9), var(--ep-to, #be185d));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-.ov-tile {
+.ep-tile {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
-  background-color: #12152a;
-  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background-color: #ffffff;
+  border: 1px solid var(--border);
 }
-.ov-tile::before {
+.ep-tile::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: -1;
   pointer-events: none;
-  background-image: radial-gradient(70% 60% at 0% 0%, var(--ov-glow, rgba(139, 92, 246, 0.35)), transparent 70%);
+  background-image: radial-gradient(70% 60% at 0% 0%, var(--ep-glow, rgba(167, 139, 250, 0.3)), transparent 70%);
 }
-.ov-tile-violet { --ov-from: #c084fc; --ov-to: #f472b6; --ov-glow: rgba(168, 85, 247, 0.4); }
-.ov-tile-blue { --ov-from: #7dd3fc; --ov-to: #60a5fa; --ov-glow: rgba(59, 130, 246, 0.4); }
-.ov-tile-green { --ov-from: #a3e635; --ov-to: #34d399; --ov-glow: rgba(52, 211, 153, 0.35); }
-.ov-tile-amber { --ov-from: #fde68a; --ov-to: #fb923c; --ov-glow: rgba(251, 146, 60, 0.35); }
+.ep-tile-violet { --ep-from: #6d28d9; --ep-to: #be185d; --ep-glow: rgba(167, 139, 250, 0.35); }
+.ep-tile-blue { --ep-from: #1d4ed8; --ep-to: #0369a1; --ep-glow: rgba(125, 211, 252, 0.4); }
+.ep-tile-green { --ep-from: #15803d; --ep-to: #0f766e; --ep-glow: rgba(110, 231, 183, 0.4); }
+.ep-tile-amber { --ep-from: #b45309; --ep-to: #c2410c; --ep-glow: rgba(253, 186, 116, 0.4); }
+.ep-tile-rose { --ep-from: #be123c; --ep-to: #c2410c; --ep-glow: rgba(253, 164, 175, 0.4); }
 
-/* Light variants for the overview page (toggle in overview-theme-toggle.tsx).
-   The aurora hero stays dark in both modes. */
-.light .ov-tile {
-  background-color: #ffffff;
-  border-color: var(--border);
+.dark .ep-gradient-text {
+  background-image: linear-gradient(92deg, var(--ep-from, #c084fc), var(--ep-to, #f472b6));
 }
-.light .ov-tile-violet { --ov-from: #6d28d9; --ov-to: #be185d; --ov-glow: rgba(167, 139, 250, 0.35); }
-.light .ov-tile-blue { --ov-from: #1d4ed8; --ov-to: #0369a1; --ov-glow: rgba(125, 211, 252, 0.4); }
-.light .ov-tile-green { --ov-from: #15803d; --ov-to: #0f766e; --ov-glow: rgba(110, 231, 183, 0.4); }
-.light .ov-tile-amber { --ov-from: #b45309; --ov-to: #c2410c; --ov-glow: rgba(253, 186, 116, 0.4); }
-.light .ov-gradient-text {
-  background-image: linear-gradient(92deg, var(--ov-from, #6d28d9), var(--ov-to, #be185d));
+.dark .ep-tile {
+  background-color: #12152a;
+  border-color: color-mix(in oklab, var(--border) 80%, transparent);
 }
+.dark .ep-tile-violet { --ep-from: #c084fc; --ep-to: #f472b6; --ep-glow: rgba(168, 85, 247, 0.4); }
+.dark .ep-tile-blue { --ep-from: #7dd3fc; --ep-to: #60a5fa; --ep-glow: rgba(59, 130, 246, 0.4); }
+.dark .ep-tile-green { --ep-from: #a3e635; --ep-to: #34d399; --ep-glow: rgba(52, 211, 153, 0.35); }
+.dark .ep-tile-amber { --ep-from: #fde68a; --ep-to: #fb923c; --ep-glow: rgba(251, 146, 60, 0.35); }
+.dark .ep-tile-rose { --ep-from: #fda4af; --ep-to: #fb923c; --ep-glow: rgba(251, 113, 133, 0.35); }
