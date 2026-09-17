@@ -204,7 +204,7 @@ Requests are validated with Pydantic `Literal` enums, so an unknown category ret
 
 ## Web app
 
-A Next.js 16 frontend under [`web/`](web/) built with Tailwind 4, shadcn/ui and Recharts on top of the REST API. A public landing page at `/` tells the story (the leakage problem, results, a live scoring demo, the pipeline, responsible use) in an editorial style with Playfair Display and Inter. Behind it, six app pages: Overview (KPIs, registered models, risk by group), Predict (form, probability gauge with the decision threshold marked, both flags, the conformal interval, SHAP contributions), Leaderboard, Explainability, Fairness (audit and the before/after mitigation table) and Monitoring (drift of the live prediction window). Server components read from the API directly; the Predict form goes through a `/api/*` proxy route.
+A Next.js 16 frontend under [`web/`](web/) built with Tailwind 4, shadcn/ui and Recharts on top of the REST API. A public landing page at `/` tells the story (the leakage problem, results, a live scoring demo, the pipeline, responsible use) in an editorial style with Playfair Display and Inter. Behind it, six app pages with a light and dark theme switch: Overview (KPIs, registered models, risk by group), Predict (form, probability gauge with the decision threshold marked, both flags, the conformal interval, SHAP contributions), Leaderboard, Explainability, Fairness (audit and the before/after mitigation table) and Monitoring (drift of the live prediction window). Server components read from the API directly; the Predict form goes through a `/api/*` proxy route.
 
 ```bash
 cd web && npm install

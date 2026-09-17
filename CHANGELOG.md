@@ -2,6 +2,15 @@
 
 Notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Changed
+- App pages restyled on a splash layout: aurora hero, stat tiles with gradient numerals, panels and chips, Inter Tight headings; shared pieces in `web/src/components/splash.tsx`. Light is the default theme with a switch in every page header; the choice is kept in localStorage. The landing page is unchanged.
+- Web screenshots in the README refreshed.
+
+### Fixed
+- Slider tracks in the Predict form rendered at zero height because the `data-horizontal` and `data-vertical` variants the shadcn primitives use were never defined.
+
 ## [1.5.0] - 2026-09-12
 
 ### Added
