@@ -119,7 +119,7 @@ export function PredictForm({ tasks, thresholds }: { tasks: TaskName[]; threshol
       >
         <form onSubmit={submit} className="flex flex-col gap-5">
             <Tabs value={task} onValueChange={(v) => { setTask(v as TaskName); setResult(null); }}>
-              <TabsList aria-label="Prediction task" className="h-10 w-full rounded-full p-1">
+              <TabsList aria-label="Prediction task" className="h-10 w-full rounded-full p-1 group-data-horizontal/tabs:h-10">
                 {tasks.map((t) => (
                   <TabsTrigger key={t} value={t} className="flex-1 rounded-full">
                     {TASK_LABEL[t].split(" ")[0]}

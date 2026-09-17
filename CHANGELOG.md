@@ -14,6 +14,7 @@ Notable changes to this project are recorded here. The format follows [Keep a Ch
 
 ### Fixed
 - Switching tasks used to swap the whole page for the loading skeleton and gave no motion afterwards.
+- The task picker's active pill overflowed its track by 2px top and bottom once the orientation variants existed (the tabs primitive's `h-8` started applying); the two pill tab lists now set their own height at the same specificity.
 - Slider tracks in the Predict form rendered at zero height because the `data-horizontal` and `data-vertical` variants the shadcn primitives use were never defined.
 
 ## [1.5.0] - 2026-09-12

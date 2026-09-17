@@ -38,7 +38,7 @@ export function TaskPicker({ tasks }: { tasks: TaskName[] }) {
         aria-label="Task"
         aria-busy={pending || undefined}
         className={cn(
-          "h-auto flex-wrap justify-center gap-1 rounded-full bg-white/10 p-1 backdrop-blur transition-opacity",
+          "h-auto flex-wrap justify-center gap-1 rounded-full bg-white/10 p-1 backdrop-blur transition-opacity group-data-horizontal/tabs:h-auto",
           pending && "opacity-80",
         )}
       >
