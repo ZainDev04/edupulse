@@ -50,7 +50,7 @@ export default async function LandingPage() {
       <section className="relative overflow-hidden px-5 pb-24 pt-36 sm:px-8 sm:pt-44">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
+          className="lp-glow pointer-events-none absolute inset-0"
           style={{
             background:
               "radial-gradient(60% 50% at 70% 10%, rgba(139,92,246,0.28) 0%, rgba(139,92,246,0) 60%), radial-gradient(40% 40% at 15% 80%, rgba(56,189,248,0.12) 0%, rgba(56,189,248,0) 60%)",
@@ -66,17 +66,17 @@ export default async function LandingPage() {
           }}
         />
         <div className="relative mx-auto flex max-w-4xl flex-col items-center text-center">
-          <p className="eyebrow text-primary">Student performance intelligence</p>
-          <h1 className="mt-6 max-w-4xl text-balance font-display text-5xl font-medium leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
+          <p className="lp-in lp-d0 eyebrow text-primary">Student performance intelligence</p>
+          <h1 className="lp-in lp-d1 mt-6 max-w-4xl text-balance font-display text-5xl font-medium leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
             <em className="italic">Catch the student</em> who will struggle, before the <em className="italic">first exam</em>
             <span className="text-primary">.</span>
           </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-relaxed text-white/70">
+          <p className="lp-in lp-d2 mt-7 max-w-2xl text-lg leading-relaxed text-white/70">
             EduPulse turns a public exam dataset into a complete early-warning system: ten model families benchmarked,
             a threshold set from a recall target, every prediction explained, every group audited, and the whole
             thing served from one API.
           </p>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <div className="lp-in lp-d3 mt-9 flex flex-wrap items-center justify-center gap-3">
             <Button render={<a href="#demo" />} nativeButton={false} size="lg">
               Try the live demo <ArrowRight className="size-4" aria-hidden="true" />
             </Button>
@@ -84,12 +84,12 @@ export default async function LandingPage() {
               Open the app
             </Button>
           </div>
-          <p className="mt-5 text-xs text-white/40">
+          <p className="lp-in lp-d4 mt-5 text-xs text-white/40">
             v{n.version}, 63 tests, MIT licence. Free-tier hosting: the first request after idle can take a moment.
           </p>
         </div>
 
-        <dl className="relative mx-auto mt-20 grid max-w-5xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-4">
+        <dl className="lp-in lp-d5 relative mx-auto mt-20 grid max-w-5xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-4">
           {[
             { k: "Recall gap across lunch groups", v: `${fmt(gapBefore, 3)} to ${fmt(gapAfter, 3)}`, s: "after per-group thresholds" },
             { k: "At-risk recall, hold-out", v: `${Math.round(n.recall * 100)}% to ${Math.round(n.recallAfter * 100)}%`, s: "same model, fairer cut-off" },
