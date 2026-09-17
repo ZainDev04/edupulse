@@ -2,16 +2,14 @@
 
 Notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [1.6.0] - 2026-09-17
 
 ### Changed
 - App pages restyled on a splash layout: aurora hero, stat tiles with gradient numerals, panels and chips, Inter Tight headings; shared pieces in `web/src/components/splash.tsx`. Light is the default theme with a switch in every page header; the choice is kept in localStorage. The landing page is unchanged.
 - Web screenshots in the README refreshed.
 - App pages animate in on navigation and a skeleton shows while the next page waits on the API. Sections in view rise in with a stagger, stat tiles one by one; the rest reveal as they scroll into view (`components/app-reveal.tsx`, Web Animations API). Off under `prefers-reduced-motion`.
 - Landing page: the hero lines and stats strip rise in one after another on first paint, the nav fades in and the glow behind the hero drifts slowly; off under `prefers-reduced-motion`.
-
 - Leaderboard, Explainability, Fairness and Monitoring render their hero from a layout, so switching tasks keeps the hero and the current content on screen (spinner on the tapped tab) until the next task's data arrives, then the sections below the hero reveal again. A content-only skeleton covers first loads. The hero eyebrows on those pages are now fixed text.
-
 - Phone layouts (320 to 767px): bar charts shrink their label column and wrap long names below 768px, grouped-bar x labels wrap (and break after a slash below 400px), the task picker shows short labels so all three pills fit one row, the hero tightens its padding and type, and the mobile header status no longer wraps. Explicit `max-width: 767px` and `480px` blocks in globals.css hold the rest.
 
 ### Fixed
