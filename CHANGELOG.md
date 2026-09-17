@@ -12,6 +12,8 @@ Notable changes to this project are recorded here. The format follows [Keep a Ch
 
 - Leaderboard, Explainability, Fairness and Monitoring render their hero from a layout, so switching tasks keeps the hero and the current content on screen (spinner on the tapped tab) until the next task's data arrives, then the sections below the hero reveal again. A content-only skeleton covers first loads. The hero eyebrows on those pages are now fixed text.
 
+- Phone layouts (320 to 767px): bar charts shrink their label column and wrap long names below 768px, grouped-bar x labels wrap (and break after a slash below 400px), the task picker shows short labels so all three pills fit one row, the hero tightens its padding and type, and the mobile header status no longer wraps. Explicit `max-width: 767px` and `480px` blocks in globals.css hold the rest.
+
 ### Fixed
 - Switching tasks used to swap the whole page for the loading skeleton and gave no motion afterwards.
 - The task picker's active pill overflowed its track by 2px top and bottom once the orientation variants existed (the tabs primitive's `h-8` started applying); the two pill tab lists now set their own height at the same specificity.

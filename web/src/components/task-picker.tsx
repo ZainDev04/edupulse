@@ -7,6 +7,13 @@ import { cn } from "cn";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TASK_LABEL, type TaskName } from "@/lib/api";
 
+/** Labels for phones (below the 640px breakpoint), so all three pills fit one row. */
+const SHORT_LABEL: Record<TaskName, string> = {
+  at_risk: "At-risk",
+  math_score: "Math",
+  performance_level: "Performance",
+};
+
 /**
  * Task switcher that writes ?task= to the URL so pages stay server-rendered
  * and deep-linkable. The push runs in a transition, so the current page
@@ -46,9 +53,10 @@ export function TaskPicker({ tasks }: { tasks: TaskName[] }) {
           <TabsTrigger
             key={t}
             value={t}
-            className="h-9 flex-none rounded-full px-4 text-white/75 hover:text-white focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-white/50 data-active:bg-white data-active:text-slate-900 data-active:shadow-none dark:text-white/75 dark:hover:text-white dark:data-active:border-transparent dark:data-active:bg-white dark:data-active:text-slate-900"
+            className="h-9 flex-none rounded-full px-2.5 text-xs text-white/75 min-[400px]:px-3 min-[400px]:text-sm sm:px-4 hover:text-white focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-white/50 data-active:bg-white data-active:text-slate-900 data-active:shadow-none dark:text-white/75 dark:hover:text-white dark:data-active:border-transparent dark:data-active:bg-white dark:data-active:text-slate-900"
           >
-            {TASK_LABEL[t]}
+            <span className="sm:hidden">{SHORT_LABEL[t]}</span>
+            <span className="hidden sm:inline">{TASK_LABEL[t]}</span>
             {pending && t === shown && <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />}
           </TabsTrigger>
         ))}

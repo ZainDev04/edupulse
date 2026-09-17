@@ -26,14 +26,14 @@ export function PageHero({
   return (
     <section
       className={cn(
-        "ep-aurora relative overflow-hidden rounded-[28px] border border-white/10 px-6 text-center sm:px-10",
-        compact ? "py-10 sm:py-12" : "py-14 sm:py-20",
+        "ep-aurora relative overflow-hidden rounded-3xl border border-white/10 px-5 text-center sm:rounded-[28px] sm:px-10",
+        compact ? "pt-14 pb-8 sm:py-12" : "pt-16 pb-10 sm:py-20",
       )}
     >
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
         <ThemeToggle />
       </div>
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-5">
+      <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-4 sm:gap-5">
         {eyebrows && eyebrows.length > 0 && (
           <div className="flex flex-wrap items-center justify-center gap-2">
             {eyebrows.map((e, i) => (
@@ -51,10 +51,15 @@ export function PageHero({
             ))}
           </div>
         )}
-        <h1 className={cn("ep-headline text-white", compact ? "text-3xl sm:text-5xl" : "text-4xl sm:text-6xl")}>
+        <h1
+          className={cn(
+            "ep-headline text-balance text-white",
+            compact ? "text-3xl sm:text-5xl" : "text-[2rem] min-[400px]:text-4xl sm:text-6xl",
+          )}
+        >
           {title}
         </h1>
-        <p className="max-w-2xl text-base text-white/80 sm:text-lg">{description}</p>
+        <p className="max-w-2xl text-sm text-white/80 min-[400px]:text-base sm:text-lg">{description}</p>
         {children && <div className="flex flex-wrap items-center justify-center gap-3">{children}</div>}
       </div>
     </section>
@@ -124,7 +129,7 @@ export function Tile({
         </span>
       </div>
       <div>
-        <div className={cn("ep-headline ep-gradient-text tabular-nums", long ? "text-2xl sm:text-3xl" : "text-5xl")}>
+        <div className={cn("ep-headline ep-gradient-text tabular-nums", long ? "text-2xl sm:text-3xl" : "text-4xl sm:text-5xl")}>
           {value}
         </div>
         {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}

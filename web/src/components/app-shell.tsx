@@ -64,7 +64,13 @@ export function AppShell({ health, children }: { health: Health | null; children
         className={cn("inline-block size-2 rounded-full", online ? "bg-primary" : "bg-destructive")}
         aria-hidden="true"
       />
-      {online ? `API online, ${trained}/3 models` : "API offline"}
+      {online ? (
+        <span className="whitespace-nowrap">
+          API online<span className="hidden min-[400px]:inline">, {trained}/3 models</span>
+        </span>
+      ) : (
+        "API offline"
+      )}
     </div>
   );
 
@@ -92,7 +98,7 @@ export function AppShell({ health, children }: { health: Health | null; children
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-border px-4 py-3 lg:hidden">
+        <header className="flex items-center gap-2 border-b border-border px-3 py-3 sm:gap-3 sm:px-4 lg:hidden">
           <Button
             variant="ghost"
             size="icon"

@@ -374,3 +374,32 @@
     animation: none;
   }
 }
+
+/* Phone layouts. Tailwind's responsive prefixes above cover most of it;
+   these blocks hold the rest for the 767px (upper mobile) and 480px
+   (classic mobile) boundaries. */
+@media (max-width: 767px) {
+  .ep-page > * {
+    gap: 1.5rem;
+  }
+  .ep-headline {
+    letter-spacing: -0.02em;
+  }
+  [data-slot="table"] {
+    font-size: 0.8125rem;
+  }
+}
+@media (max-width: 480px) {
+  main {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .ep-tile {
+    border-radius: 1.25rem;
+  }
+  .ep-page > * > section.rounded-\[28px\] {
+    border-radius: 1.25rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
