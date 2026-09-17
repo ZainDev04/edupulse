@@ -102,7 +102,7 @@ export default async function OverviewPage() {
           }
           description="Latest version per task. Hold-out metrics are computed on 200 students the models never saw."
         />
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3" data-reveal="items">
           {tasks.map((t) => (
             <ModelCard key={t} task={t} info={models[t]} />
           ))}
