@@ -5,7 +5,7 @@ import { RankedBars } from "@/components/charts/bar-charts";
 import { OfflineNotice } from "@/components/offline-notice";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Accent, Chip, Panel, SectionHeading, Tile } from "@/components/splash";
+import { Accent, Note, Panel, SectionHeading, Tile } from "@/components/splash";
 import { pickTask } from "@/lib/tasks";
 
 export const metadata: Metadata = { title: "Leaderboard" };
@@ -38,11 +38,9 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
   return (
     <>
       {info.leakage_note && (
-        <div className="flex justify-center">
-          <Chip icon={AlertTriangle} tone="warn">
-            <span className="font-medium">Leakage note.</span> {info.leakage_note}
-          </Chip>
-        </div>
+        <Note icon={AlertTriangle}>
+          <span className="font-medium">Leakage note.</span> {info.leakage_note}
+        </Note>
       )}
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" data-reveal="items" aria-label="Selected model">

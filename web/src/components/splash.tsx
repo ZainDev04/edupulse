@@ -182,7 +182,8 @@ export function Chip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border py-1.5 pr-3 pl-2.5 text-sm",
+        // 17px is a full pill for a one-line chip and stays a soft corner when the text wraps
+        "inline-flex max-w-full items-center gap-2 rounded-[17px] border py-1.5 pr-3 pl-2.5 text-left text-sm",
         tone === "default" && "border-border bg-background/60",
         tone === "warn" && "border-amber-500/40 bg-amber-500/10",
         tone === "alert" && "border-destructive/40 bg-destructive/10",
@@ -191,7 +192,7 @@ export function Chip({
       {Icon && (
         <Icon
           className={cn(
-            "size-4",
+            "size-4 shrink-0",
             tone === "default" && "text-lime-600 dark:text-lime-400",
             tone === "warn" && "text-amber-600 dark:text-amber-400",
             tone === "alert" && "text-destructive",
@@ -204,5 +205,25 @@ export function Chip({
         <span className="ep-gradient-text font-mono text-sm font-semibold tabular-nums">{value}</span>
       )}
     </span>
+  );
+}
+
+/** Callout for a paragraph-length note, such as the leakage warning. */
+export function Note({ icon: Icon, tone = "warn", children }: { icon?: LucideIcon; tone?: "warn" | "default"; children: React.ReactNode }) {
+  return (
+    <div
+      className={cn(
+        "mx-auto flex w-full max-w-3xl items-start gap-2.5 rounded-2xl border px-4 py-3 text-left text-sm",
+        tone === "warn" ? "border-amber-500/40 bg-amber-500/10" : "border-border bg-card",
+      )}
+    >
+      {Icon && (
+        <Icon
+          className={cn("mt-0.5 size-4 shrink-0", tone === "warn" ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}
+          aria-hidden="true"
+        />
+      )}
+      <p>{children}</p>
+    </div>
   );
 }
