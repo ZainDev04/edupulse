@@ -1,40 +1,23 @@
 import type { Metadata } from "next";
-import { api, type TaskName } from "@/lib/api";
+import { api } from "@/lib/api";
 import { RankedBars } from "@/components/charts/bar-charts";
 import { OfflineNotice } from "@/components/offline-notice";
-import { TaskPicker } from "@/components/task-picker";
-import { Accent, PageHero, Panel, SectionHeading } from "@/components/splash";
+import { Accent, Panel, SectionHeading } from "@/components/splash";
+import { pickTask } from "@/lib/tasks";
 
 export const metadata: Metadata = { title: "Explainability" };
 
-const TASKS: TaskName[] = ["at_risk", "math_score", "performance_level"];
-
 export default async function ExplainPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const raw = (await searchParams).task;
-  const v = Array.isArray(raw) ? raw[0] : raw;
-  const task: TaskName = TASKS.includes(v as TaskName) ? (v as TaskName) : "at_risk";
+  const task = pickTask((await searchParams).task);
   const [info, imp] = await Promise.all([api.model(task), api.importance(task)]);
   if (!info || !imp) return <OfflineNotice />;
 
   const shap = imp.shap.map((r) => ({ name: r.feature, value: r.mean_abs_shap }));
   const perm = imp.permutation.map((r) => ({ name: r.feature, value: r.importance_mean, std: r.importance_std }));
   const permMetric = info.kind === "binary" ? "ROC-AUC" : info.kind === "regression" ? "R²" : "macro-F1";
-  const top = shap[0]?.name.replace(/_/g, " ");
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8">
-      <PageHero
-        compact
-        eyebrows={[
-          imp.shap_kind ? `${imp.shap_kind} SHAP explainer` : "SHAP explainer",
-          top ? `Strongest signal: ${top}` : `${info.model_class}`,
-        ]}
-        title="Explainability"
-        description={`Two independent views of what the model relies on. SHAP values are computed on the encoded features and summed back to the original columns, so one-hot categories appear as a single bar. Permutation importance measures how much the hold-out ${permMetric} drops when a column is shuffled.`}
-      >
-        <TaskPicker tasks={TASKS} current={task} />
-      </PageHero>
-
+    <>
       <section className="flex flex-col gap-6" aria-labelledby="views-heading">
         <SectionHeading
           id="views-heading"
@@ -82,6 +65,6 @@ export default async function ExplainPage({ searchParams }: { searchParams: Prom
           available on the Predict page.
         </p>
       </Panel>
-    </div>
+    </>
   );
 }

@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { AlertTriangle, CheckCircle2, Scale, ShieldCheck, Users } from "lucide-react";
-import { api, fmt, titleCase, type FairnessGroup, type Mitigated, type TaskName } from "@/lib/api";
+import { api, fmt, titleCase, type FairnessGroup, type Mitigated } from "@/lib/api";
 import { GroupedBars } from "@/components/charts/bar-charts";
 import { OfflineNotice } from "@/components/offline-notice";
-import { TaskPicker } from "@/components/task-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Accent, Chip, PageHero, Panel, SectionHeading, Tile } from "@/components/splash";
+import { Accent, Chip, Panel, SectionHeading, Tile } from "@/components/splash";
+import { pickTask } from "@/lib/tasks";
 
 export const metadata: Metadata = { title: "Fairness" };
 
-const TASKS: TaskName[] = ["at_risk", "math_score", "performance_level"];
 const BINARY_METRICS = [
   { key: "selection_rate", label: "selection rate" },
   { key: "tpr", label: "recall (TPR)" },
@@ -18,9 +17,7 @@ const BINARY_METRICS = [
 ];
 
 export default async function FairnessPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const raw = (await searchParams).task;
-  const v = Array.isArray(raw) ? raw[0] : raw;
-  const task: TaskName = TASKS.includes(v as TaskName) ? (v as TaskName) : "at_risk";
+  const task = pickTask((await searchParams).task);
   const [info, fair] = await Promise.all([api.model(task), api.fairness(task)]);
   if (!info || !fair) return <OfflineNotice />;
 
@@ -33,19 +30,7 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
         : [{ key: "accuracy", label: "accuracy" }];
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8">
-      <PageHero
-        compact
-        eyebrows={[
-          `${attributes.length} sensitive attributes`,
-          fair.mitigated ? `Recall equalised across ${fair.mitigated.attribute}` : "Hold-out slices, 200 students",
-        ]}
-        title="Fairness audit"
-        description="Hold-out performance sliced by sensitive attribute. For an early-warning tool the gap that matters most is recall: are at-risk students caught at the same rate in every group? Some difference in selection rate is expected because base rates genuinely differ. A disparate-impact ratio below 0.8 is the conventional four-fifths warning level."
-      >
-        <TaskPicker tasks={TASKS} current={task} />
-      </PageHero>
-
+    <>
       {fair.mitigated && <Mitigation m={fair.mitigated} before={fair.groups} threshold={info.threshold} />}
 
       <section className="flex flex-col gap-6" data-reveal="items" aria-labelledby="slices-heading">
@@ -120,7 +105,7 @@ export default async function FairnessPage({ searchParams }: { searchParams: Pro
           );
         })}
       </section>
-    </div>
+    </>
   );
 }
 

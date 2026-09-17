@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { Activity, AlertTriangle, CheckCircle2, Database, Radar, Sigma } from "lucide-react";
-import { api, fmt, titleCase, type DriftFeature, type DriftReport, type TaskName } from "@/lib/api";
+import { api, fmt, titleCase, type DriftFeature, type DriftReport } from "@/lib/api";
 import { RankedBars } from "@/components/charts/bar-charts";
 import { OfflineNotice } from "@/components/offline-notice";
-import { TaskPicker } from "@/components/task-picker";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Accent, Chip, PageHero, Panel, SectionHeading, Tile, type Tone } from "@/components/splash";
+import { Accent, Chip, Panel, SectionHeading, Tile, type Tone } from "@/components/splash";
+import { pickTask } from "@/lib/tasks";
 
 export const metadata: Metadata = { title: "Monitoring" };
 
-const TASKS: TaskName[] = ["at_risk", "math_score", "performance_level"];
 const STATUS_VARIANT = { ok: "secondary", warn: "outline", alert: "destructive", insufficient: "outline" } as const;
 const STATUS_TEXT = {
   ok: "stable",
@@ -22,25 +21,14 @@ const STATUS_TONE: Record<DriftReport["status"], Tone> = { ok: "green", warn: "a
 const STATUS_CHIP = { ok: "default", warn: "warn", alert: "alert", insufficient: "default" } as const;
 
 export default async function MonitoringPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const raw = (await searchParams).task;
-  const v = Array.isArray(raw) ? raw[0] : raw;
-  const task: TaskName = TASKS.includes(v as TaskName) ? (v as TaskName) : "at_risk";
+  const task = pickTask((await searchParams).task);
   const [info, drift] = await Promise.all([api.model(task), api.drift(task)]);
   if (!info || !drift) return <OfflineNotice />;
 
   const waiting = drift.status === "insufficient";
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8">
-      <PageHero
-        compact
-        eyebrows={[`${drift.n_current} scored in the window`, `model v${drift.model_version}`]}
-        title="Drift monitoring"
-        description="The API keeps the last few thousand scored students in memory and compares them with the training population. Population stability index (PSI) per input flags a shift in who is being scored; a Kolmogorov-Smirnov test on the model output flags a shift in what the model says. PSI below 0.10 is stable, 0.10 to 0.25 is worth a look, above 0.25 is a material shift."
-      >
-        <TaskPicker tasks={TASKS} current={task} />
-      </PageHero>
-
+    <>
       <div className="flex justify-center">
         <Chip icon={drift.status === "ok" ? CheckCircle2 : AlertTriangle} tone={STATUS_CHIP[drift.status]}>
           {titleCase(task)}: <span className="font-medium">{STATUS_TEXT[drift.status]}</span>
@@ -89,7 +77,7 @@ export default async function MonitoringPage({ searchParams }: { searchParams: P
           <Report drift={drift} />
         </section>
       )}
-    </div>
+    </>
   );
 }
 

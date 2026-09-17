@@ -10,7 +10,10 @@ Notable changes to this project are recorded here. The format follows [Keep a Ch
 - App pages animate in on navigation and a skeleton shows while the next page waits on the API. Sections in view rise in with a stagger, stat tiles one by one; the rest reveal as they scroll into view (`components/app-reveal.tsx`, Web Animations API). Off under `prefers-reduced-motion`.
 - Landing page: the hero lines and stats strip rise in one after another on first paint, the nav fades in and the glow behind the hero drifts slowly; off under `prefers-reduced-motion`.
 
+- Leaderboard, Explainability, Fairness and Monitoring render their hero from a layout, so switching tasks keeps the hero and the current content on screen (spinner on the tapped tab) until the next task's data arrives, then the sections below the hero reveal again. A content-only skeleton covers first loads. The hero eyebrows on those pages are now fixed text.
+
 ### Fixed
+- Switching tasks used to swap the whole page for the loading skeleton and gave no motion afterwards.
 - Slider tracks in the Predict form rendered at zero height because the `data-horizontal` and `data-vertical` variants the shadcn primitives use were never defined.
 
 ## [1.5.0] - 2026-09-12

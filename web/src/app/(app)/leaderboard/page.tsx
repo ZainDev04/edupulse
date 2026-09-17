@@ -1,21 +1,14 @@
 import type { Metadata } from "next";
 import { AlertTriangle, Award, Clock3, Cpu, Target } from "lucide-react";
-import { api, fmt, titleCase, type LeaderboardRow, type TaskName } from "@/lib/api";
+import { api, fmt, titleCase, type LeaderboardRow } from "@/lib/api";
 import { RankedBars } from "@/components/charts/bar-charts";
 import { OfflineNotice } from "@/components/offline-notice";
-import { TaskPicker } from "@/components/task-picker";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Accent, Chip, PageHero, Panel, SectionHeading, Tile } from "@/components/splash";
+import { Accent, Chip, Panel, SectionHeading, Tile } from "@/components/splash";
+import { pickTask } from "@/lib/tasks";
 
 export const metadata: Metadata = { title: "Leaderboard" };
-
-const TASKS: TaskName[] = ["at_risk", "math_score", "performance_level"];
-
-function pickTask(raw: string | string[] | undefined): TaskName {
-  const v = Array.isArray(raw) ? raw[0] : raw;
-  return TASKS.includes(v as TaskName) ? (v as TaskName) : "at_risk";
-}
 
 export default async function LeaderboardPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const task = pickTask((await searchParams).task);
@@ -43,16 +36,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
         : { label: "Hold-out accuracy", value: info.test_metrics.accuracy };
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8">
-      <PageHero
-        compact
-        eyebrows={[`${rows.length} candidates`, "Repeated stratified cross-validation, 800 students"]}
-        title="Model leaderboard"
-        description="Every candidate scored with repeated stratified cross-validation on the 800 training students. The best non-baseline family is then tuned with Optuna and fitted once on the full training split."
-      >
-        <TaskPicker tasks={TASKS} current={task} />
-      </PageHero>
-
+    <>
       {info.leakage_note && (
         <div className="flex justify-center">
           <Chip icon={AlertTriangle} tone="warn">
@@ -131,6 +115,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
           </TableBody>
         </Table>
       </Panel>
-    </div>
+    </>
   );
 }
