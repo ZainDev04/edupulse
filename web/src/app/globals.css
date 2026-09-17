@@ -241,3 +241,42 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Overview page only. Splash-style treatment after the Elementra theme:
+   tight display type, aurora hero, gradient numerals, pill chips. */
+.ov-headline {
+  font-family: var(--font-inter-tight), var(--font-inter), ui-sans-serif, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.ov-aurora {
+  background-color: #0b0e1a;
+  background-image:
+    radial-gradient(55% 80% at 12% 18%, rgba(59, 130, 246, 0.45), transparent 62%),
+    radial-gradient(45% 70% at 88% 8%, rgba(168, 85, 247, 0.55), transparent 60%),
+    radial-gradient(60% 55% at 55% 110%, rgba(236, 72, 153, 0.35), transparent 65%);
+}
+.ov-gradient-text {
+  background-image: linear-gradient(92deg, var(--ov-from, #c084fc), var(--ov-to, #f472b6));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.ov-tile {
+  position: relative;
+  overflow: hidden;
+  background-color: #12152a;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+}
+.ov-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(70% 60% at 0% 0%, var(--ov-glow, rgba(139, 92, 246, 0.35)), transparent 70%);
+}
+.ov-tile-violet { --ov-from: #c084fc; --ov-to: #f472b6; --ov-glow: rgba(168, 85, 247, 0.4); }
+.ov-tile-blue { --ov-from: #7dd3fc; --ov-to: #60a5fa; --ov-glow: rgba(59, 130, 246, 0.4); }
+.ov-tile-green { --ov-from: #a3e635; --ov-to: #34d399; --ov-glow: rgba(52, 211, 153, 0.35); }
+.ov-tile-amber { --ov-from: #fde68a; --ov-to: #fb923c; --ov-glow: rgba(251, 146, 60, 0.35); }
