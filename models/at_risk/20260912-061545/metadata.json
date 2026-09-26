@@ -338,7 +338,7 @@
         "disparate_impact_ratio": 0.35467980295566504
       }
     },
-    "figure": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_subgroups.png",
+    "figure": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_subgroups.png",
     "mitigated": {
       "attribute": "lunch",
       "thresholds": {
@@ -554,21 +554,21 @@
         "flagged_rate": 0.63,
         "fpr": 0.5314685314685315
       },
-      "figure": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_mitigation.png"
+      "figure": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_mitigation.png"
     }
   },
   "figures": {
-    "leaderboard": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\leaderboard.png",
-    "tuning": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\tuning_history.png",
-    "roc_pr": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\roc_pr.png",
-    "calibration": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\calibration.png",
-    "threshold": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\threshold_sweep.png",
-    "confusion": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\confusion_matrix.png",
-    "permutation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\permutation_importance.png",
-    "shap_bar": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\shap_importance.png",
-    "shap_beeswarm": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\shap_beeswarm.png",
-    "fairness": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_subgroups.png",
-    "fairness_mitigation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_mitigation.png"
+    "leaderboard": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\leaderboard.png",
+    "tuning": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\tuning_history.png",
+    "roc_pr": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\roc_pr.png",
+    "calibration": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\calibration.png",
+    "threshold": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\threshold_sweep.png",
+    "confusion": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\confusion_matrix.png",
+    "permutation": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\permutation_importance.png",
+    "shap_bar": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\shap_importance.png",
+    "shap_beeswarm": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\shap_beeswarm.png",
+    "fairness": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_subgroups.png",
+    "fairness_mitigation": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\at_risk\\fairness_mitigation.png"
   },
   "environment": {
     "python": "3.14.6",
@@ -580,7 +580,7 @@
   "tracking": {
     "run_id": "2a34d67927874084ba9b6c1675e76edb",
     "experiment_id": "1",
-    "tracking_uri": "sqlite:///C:/Users/WzA/Desktop/ZAIN/PAI/mlruns/mlflow.db"
+    "tracking_uri": "sqlite:///D:/Desktop/ZAIN/PAI/mlruns/mlflow.db"
   },
   "conformal": {},
   "group_thresholds": {
