@@ -120,11 +120,11 @@
     }
   },
   "figures": {
-    "score_distributions": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_distributions.png",
-    "correlation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_correlation.png",
-    "scores_by_background": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\scores_by_background.png",
-    "at_risk_by_background": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\at_risk_by_background.png",
-    "pairplot": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_pairplot.png",
-    "performance_levels": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\performance_levels.png"
+    "score_distributions": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_distributions.png",
+    "correlation": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_correlation.png",
+    "scores_by_background": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\scores_by_background.png",
+    "at_risk_by_background": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\at_risk_by_background.png",
+    "pairplot": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\score_pairplot.png",
+    "performance_levels": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\eda\\performance_levels.png"
   }
 }

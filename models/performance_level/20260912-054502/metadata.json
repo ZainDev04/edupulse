@@ -284,16 +284,16 @@
         "accuracy_gap": 0.052631578947368474
       }
     },
-    "figure": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\fairness_subgroups.png"
+    "figure": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\fairness_subgroups.png"
   },
   "figures": {
-    "leaderboard": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\leaderboard.png",
-    "tuning": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\tuning_history.png",
-    "confusion": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\confusion_matrix.png",
-    "permutation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\permutation_importance.png",
-    "shap_bar": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\shap_importance.png",
-    "shap_beeswarm": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\shap_beeswarm.png",
-    "fairness": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\fairness_subgroups.png"
+    "leaderboard": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\leaderboard.png",
+    "tuning": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\tuning_history.png",
+    "confusion": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\confusion_matrix.png",
+    "permutation": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\permutation_importance.png",
+    "shap_bar": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\shap_importance.png",
+    "shap_beeswarm": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\shap_beeswarm.png",
+    "fairness": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\performance_level\\fairness_subgroups.png"
   },
   "environment": {
     "python": "3.14.6",
@@ -305,6 +305,6 @@
   "tracking": {
     "run_id": "7399b0d6b6e2482c9c778efefc38cd28",
     "experiment_id": "1",
-    "tracking_uri": "sqlite:///C:/Users/WzA/Desktop/ZAIN/PAI/mlruns/mlflow.db"
+    "tracking_uri": "sqlite:///D:/Desktop/ZAIN/PAI/mlruns/mlflow.db"
   }
 }

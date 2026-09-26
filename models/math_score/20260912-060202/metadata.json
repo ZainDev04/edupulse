@@ -242,17 +242,17 @@
         "mae_gap": 2.153159249245188
       }
     },
-    "figure": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\fairness_subgroups.png"
+    "figure": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\fairness_subgroups.png"
   },
   "figures": {
-    "leaderboard": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\leaderboard.png",
-    "tuning": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\tuning_history.png",
-    "diagnostics": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\regression_diagnostics.png",
-    "intervals": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\prediction_intervals.png",
-    "permutation": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\permutation_importance.png",
-    "shap_bar": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\shap_importance.png",
-    "shap_beeswarm": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\shap_beeswarm.png",
-    "fairness": "C:\\Users\\WzA\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\fairness_subgroups.png"
+    "leaderboard": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\leaderboard.png",
+    "tuning": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\tuning_history.png",
+    "diagnostics": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\regression_diagnostics.png",
+    "intervals": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\prediction_intervals.png",
+    "permutation": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\permutation_importance.png",
+    "shap_bar": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\shap_importance.png",
+    "shap_beeswarm": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\shap_beeswarm.png",
+    "fairness": "D:\\Desktop\\ZAIN\\PAI\\reports\\figures\\math_score\\fairness_subgroups.png"
   },
   "environment": {
     "python": "3.14.6",
@@ -264,7 +264,7 @@
   "tracking": {
     "run_id": "e69dc155921a43adab83a5d5cb2138e9",
     "experiment_id": "1",
-    "tracking_uri": "sqlite:///C:/Users/WzA/Desktop/ZAIN/PAI/mlruns/mlflow.db"
+    "tracking_uri": "sqlite:///D:/Desktop/ZAIN/PAI/mlruns/mlflow.db"
   },
   "conformal": {
     "alpha": 0.1,
