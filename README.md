@@ -37,7 +37,9 @@ Hold-out split is 200 students (20%, stratified). Cross-validation is 5-fold wit
 |---|---|---|---|
 | At-risk early warning | Logistic regression (tuned C) | ROC-AUC 0.742 ± 0.034 | ROC-AUC 0.699, PR-AUC 0.515 (prevalence 0.285), recall 0.74 at threshold 0.41; per-group thresholds lift recall to 0.88 |
 | Math-score prediction | Ridge (tuned alpha) | R² 0.867 ± 0.019 | R² 0.882, RMSE 5.36, MAE 4.18; 90% conformal interval (half-width 9.2) covers 88.5% |
-| Performance level | HistGradientBoosting (tuned) | macro-F1 0.971 | accuracy 0.985, macro-F1 0.985 |
+| Performance level | HistGradientBoosting (tuned) | macro-F1 0.967 ± 0.009 | accuracy 0.985, macro-F1 0.985 |
+
+CV scores are from the ten-family benchmark (the same numbers as the leaderboards below). Tuning the winner with Optuna moved them only slightly: ROC-AUC 0.743, R² 0.868, macro-F1 0.971.
 
 <details>
 <summary>At-risk leaderboard (CV ROC-AUC)</summary>

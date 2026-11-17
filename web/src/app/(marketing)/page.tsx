@@ -244,7 +244,7 @@ export default async function LandingPage() {
                 <tr>
                   <td className="px-6 py-4 font-sans text-sm">Performance level (leakage study)</td>
                   <td className="px-6 py-4">hist gradient boosting</td>
-                  <td className="px-6 py-4">macro-F1 0.971</td>
+                  <td className="px-6 py-4">macro-F1 0.967 ± 0.009</td>
                   <td className="px-6 py-4">accuracy 0.985, by construction</td>
                 </tr>
               </tbody>
